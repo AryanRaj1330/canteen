@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IIT (ISM) Canteen – Pre-Order & Queue System</title>
+  <meta name="description" content="Browse the IIT ISM Canteen menu, add items to cart, pre-order and track your queue status." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       CSS Variables & Reset
+    ═══════════════════════════════════════════════════════ */
+    :root {
+      --bg:          #0d1117;
+      --bg2:         #161b22;
+      --card:        rgba(22,27,34,.88);
+      --glass:       rgba(255,255,255,.05);
+      --gb:          rgba(255,255,255,.10);
+      --accent:      #f97316;
+      --acl:         #fb923c;
+      --aglow:       rgba(249,115,22,.30);
+      --green:       #22c55e;
+      --gglow:       rgba(34,197,94,.25);
+      --blue:        #3b82f6;
+      --bglow:       rgba(59,130,246,.25);
+      --yellow:      #eab308;
+      --red:         #ef4444;
+      --tp:          #f0f6fc;
+      --tm:          #8b949e;
+      --td:          #484f58;
+      --r:           14px;
+      --rs:          8px;
+      --sh:          0 8px 32px rgba(0,0,0,.4);
+      --tr:          .25s cubic-bezier(.4,0,.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:var(--bg);color:var(--tp);
+      min-height:100vh;line-height:1.6;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%,rgba(249,115,22,.12),transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%,rgba(59,130,246,.07),transparent);
+    }
+    a{color:var(--acl);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ── Layout ── */
+    .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+
+    /* ── Pages ── */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* ── Header ── */
+    .site-header{
+      position:sticky;top:0;z-index:100;
+      background:rgba(13,17,23,.85);
+      backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--gb);
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 20px;max-width:1200px;margin:0 auto;gap:16px;flex-wrap:wrap;
+    }
+    .nav-brand{
+      display:flex;align-items:center;gap:10px;
+      font-size:1.3rem;font-weight:800;color:var(--tp);cursor:pointer;letter-spacing:-.5px;
+    }
+    .nav-links{display:flex;align-items:center;gap:6px;list-style:none;flex-wrap:wrap}
+    .nav-links button{
+      display:flex;align-items:center;gap:6px;padding:8px 14px;
+      border-radius:var(--rs);font-size:.88rem;font-weight:500;
+      color:var(--tm);transition:all var(--tr);background:transparent;
+      border:none;cursor:pointer;font-family:inherit;
+    }
+    .nav-links button:hover,.nav-links button.active{color:var(--tp);background:var(--glass)}
+    .nav-links button.active{color:var(--acl)}
+    .cart-badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;
+      border-radius:50%;min-width:18px;height:18px;padding:0 4px;line-height:1;
+      transition:all var(--tr);
+    }
+
+    /* ── Hero ── */
+    .hero{padding:56px 20px 36px;text-align:center}
+    .hero h1{
+      font-size:clamp(2rem,5vw,3.2rem);font-weight:800;
+      letter-spacing:-1px;line-height:1.1;
+      background:linear-gradient(135deg,#f0f6fc 30%,var(--acl) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:12px;
+    }
+    .hero p{color:var(--tm);font-size:1.05rem;max-width:560px;margin:0 auto}
+
+    /* ── Card ── */
+    .card{
+      background:var(--card);border:1px solid var(--gb);border-radius:var(--r);
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      transition:box-shadow var(--tr),transform var(--tr),border-color var(--tr);
+    }
+    .card:hover{box-shadow:var(--sh);border-color:rgba(249,115,22,.2)}
+
+    /* ── Category Tabs ── */
+    .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;justify-content:center}
+    .tab-btn{
+      padding:8px 18px;border-radius:50px;border:1px solid var(--gb);
+      background:var(--glass);color:var(--tm);font-size:.88rem;font-weight:500;
+      cursor:pointer;transition:all var(--tr);font-family:inherit;
+    }
+    .tab-btn:hover,.tab-btn.active{
+      background:var(--accent);border-color:var(--accent);color:#fff;
+      box-shadow:0 0 16px var(--aglow);
+    }
+
+    /* ── Menu Grid ── */
+    .menu-section{padding:0 20px 40px}
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+    .menu-item{
+      display:flex;flex-direction:column;border-radius:var(--r);overflow:hidden;
+      background:var(--card);border:1px solid var(--gb);
+      transition:all var(--tr);position:relative;
+    }
+    .menu-item:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 0 1px rgba(249,115,22,.2)}
+    .menu-item.unavail{opacity:.5}
+    .item-img{
+      width:100%;height:155px;display:flex;align-items:center;justify-content:center;
+      font-size:3.2rem;
+      background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(59,130,246,.08));
+    }
+    .item-img-photo{
+      width:100%;height:155px;object-fit:cover;display:block;
+      transition:transform .35s ease;
+    }
+    .menu-item:hover .item-img-photo{ transform:scale(1.04); }
+    .item-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:5px}
+    .item-name{font-size:1rem;font-weight:700;color:var(--tp)}
+    .item-desc{font-size:.8rem;color:var(--tm);flex:1}
+
+    /* Flavour selector */
+    .flavour-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .flavour-lbl{font-size:.78rem;font-weight:600;color:var(--acl);white-space:nowrap}
+    .flavour-sel{
+      flex:1;min-width:0;padding:5px 10px;border-radius:var(--rs);
+      background:rgba(249,115,22,.10);border:1px solid rgba(249,115,22,.35);
+      color:var(--tp);font-family:inherit;font-size:.82rem;cursor:pointer;outline:none;
+      transition:border-color var(--tr);
+    }
+    .flavour-sel:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--aglow)}
+    .flavour-sel option{background:var(--bg2);color:var(--tp)}
+
+    /* Flavour tag in cart / order lines */
+    .c-flavour{color:var(--acl);font-size:.82em;font-weight:600}
+    .item-footer{
+      padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+      border-top:1px solid var(--gb);
+    }
+    .item-price{font-size:1.1rem;font-weight:700;color:var(--acl)}
+    .avail-badge{
+      position:absolute;top:10px;right:10px;font-size:.72rem;font-weight:700;
+      padding:3px 8px;border-radius:50px;
+    }
+    .badge-green{background:rgba(34,197,94,.85);color:#fff}
+    .badge-red  {background:rgba(239,68,68,.85);color:#fff}
+
+    /* ── Buttons ── */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:6px;
+      padding:9px 18px;border-radius:var(--rs);font-family:inherit;
+      font-size:.88rem;font-weight:600;cursor:pointer;transition:all var(--tr);
+      border:none;text-decoration:none;white-space:nowrap;
+    }
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:var(--acl);box-shadow:0 0 20px var(--aglow);transform:translateY(-1px);color:#fff}
+    .btn-secondary{background:var(--glass);color:var(--tp);border:1px solid var(--gb)}
+    .btn-secondary:hover{background:rgba(255,255,255,.1);color:var(--tp)}
+    .btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+    .btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-success:hover{background:#16a34a;box-shadow:0 0 20px var(--gglow);transform:translateY(-1px);color:#fff}
+    .btn-sm{padding:6px 12px;font-size:.8rem}
+    .btn-full{width:100%;justify-content:center}
+    .btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+
+    /* ── Cart Page ── */
+    .page-content{padding:0 20px 40px;max-width:1200px;margin:0 auto}
+    .two-col{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+    .col-title{font-size:.85rem;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+    .cart-list{display:flex;flex-direction:column;gap:12px}
+    .cart-row{
+      display:flex;align-items:center;gap:14px;padding:14px 16px;
+      background:var(--card);border:1px solid var(--gb);border-radius:var(--rs);
+      transition:all var(--tr);
+    }
+    .cart-row:hover{border-color:rgba(249,115,22,.2)}
+    .cart-row.unavail{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.05)}
+    .c-emoji{font-size:2rem}
+    .c-info{flex:1}
+    .c-name{font-weight:600;font-size:.95rem}
+    .c-unit{font-size:.8rem;color:var(--tm)}
+    .qty-ctrl{
+      display:flex;align-items:center;gap:8px;
+      background:var(--glass);border:1px solid var(--gb);
+      border-radius:var(--rs);padding:4px;
+    }
+    .qty-btn{
+      width:28px;height:28px;border:none;background:transparent;color:var(--tp);
+      font-size:1.1rem;cursor:pointer;border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      transition:all var(--tr);font-family:inherit;font-weight:600;
+    }
+    .qty-btn:hover{background:var(--accent);color:#fff}
+    .qty-val{min-width:28px;text-align:center;font-weight:700;font-size:.95rem}
+    .c-total{font-weight:700;font-size:1rem;color:var(--acl);min-width:64px;text-align:right}
+
+    /* ── Summary Card ── */
+    .summary-card{position:sticky;top:80px}
+    .summary-inner{padding:24px}
+    .s-title{font-size:1.1rem;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gb)}
+    .s-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+    .s-row{display:flex;justify-content:space-between;font-size:.9rem;color:var(--tm)}
+    .s-row.total{
+      font-size:1.1rem;font-weight:800;color:var(--tp);
+      padding-top:12px;border-top:1px solid var(--gb);margin-top:4px;
+    }
+    .s-row.total span:last-child{color:var(--acl)}
+
+    /* ── Forms ── */
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+    label{font-size:.85rem;font-weight:600;color:var(--tm);letter-spacing:.3px}
+    input[type=text],input[type=tel],textarea,select{
+      width:100%;padding:11px 14px;background:var(--glass);border:1px solid var(--gb);
+      border-radius:var(--rs);color:var(--tp);font-family:inherit;font-size:.92rem;outline:none;
+      transition:all var(--tr);
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--aglow)}
+    input::placeholder,textarea::placeholder{color:var(--td)}
+
+    /* ── Flash ── */
+    .flash{
+      padding:12px 16px;border-radius:var(--rs);font-size:.9rem;font-weight:500;
+      margin-bottom:16px;display:flex;align-items:center;gap:8px;
+    }
+    .flash-success{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+    .flash-error  {background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+    .flash-info   {background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--blue)}
+
+    /* ── Empty State ── */
+    .empty{text-align:center;padding:64px 20px}
+    .empty .e-icon{font-size:4rem;margin-bottom:16px}
+    .empty .e-title{font-size:1.3rem;font-weight:700;margin-bottom:8px}
+    .empty .e-sub{color:var(--tm);font-size:.92rem;margin-bottom:24px}
+
+    /* ── Orders Page ── */
+    .orders-grid{display:flex;flex-direction:column;gap:16px}
+    .order-card{padding:20px 22px}
+    .order-hdr{
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--gb);
+    }
+    .order-no{font-size:1.1rem;font-weight:800;letter-spacing:-.5px}
+    .order-no small{display:block;font-size:.75rem;font-weight:400;color:var(--tm);margin-bottom:2px}
+    .sbadge{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;
+      font-size:.82rem;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
+    }
+    .s-received {background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+    .s-preparing{background:rgba(234,179,8,.15);color:var(--yellow);border:1px solid rgba(234,179,8,.3)}
+    .s-ready    {background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+    .o-items{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .o-item-row{display:flex;justify-content:space-between;font-size:.88rem;color:var(--tm)}
+    .o-item-row span:last-child{color:var(--tp);font-weight:500}
+    .order-ftr{
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+      gap:10px;padding-top:12px;border-top:1px solid var(--gb);
+    }
+
+    /* ── Progress Steps ── */
+    .steps{display:flex;align-items:flex-start;margin:14px 0}
+    .step{flex:1;text-align:center;position:relative}
+    .step::before{
+      content:'';position:absolute;top:14px;left:50%;right:-50%;
+      height:2px;background:var(--gb);z-index:0;
+    }
+    .step:last-child::before{display:none}
+    .step.done::before{background:var(--accent)}
+    .step-dot{
+      width:28px;height:28px;border-radius:50%;background:var(--bg2);
+      border:2px solid var(--gb);margin:0 auto 6px;position:relative;z-index:1;
+      display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;
+      transition:all var(--tr);
+    }
+    .step.done .step-dot,.step.active .step-dot{border-color:var(--accent);background:var(--accent);color:#fff}
+    .step-lbl{font-size:.72rem;color:var(--td);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .step.done .step-lbl,.step.active .step-lbl{color:var(--acl)}
+
+    /* ── Confirm Page ── */
+    .confirm-wrap{max-width:560px;margin:40px auto;padding:36px;text-align:center}
+    @keyframes bounceIn{
+      0%  {opacity:0;transform:scale(.8) translateY(30px)}
+      60% {opacity:1;transform:scale(1.03) translateY(-6px)}
+      100%{opacity:1;transform:scale(1) translateY(0)}
+    }
+    .confirm-wrap{animation:bounceIn .55s cubic-bezier(.4,0,.2,1) both}
+    .c-icon{font-size:4rem;margin-bottom:16px;display:block}
+    .c-order-no{font-size:2rem;font-weight:800;letter-spacing:-1px;color:var(--acl);margin:8px 0 4px}
+    .c-hint{color:var(--tm);font-size:.9rem;margin-bottom:28px}
+    .c-details{background:var(--glass);border:1px solid var(--gb);border-radius:var(--rs);padding:16px;text-align:left;margin-bottom:20px}
+    .c-row{display:flex;justify-content:space-between;font-size:.88rem;padding:5px 0;border-bottom:1px solid var(--gb)}
+    .c-row:last-child{border-bottom:none}
+    .c-row span:first-child{color:var(--tm)}
+
+    /* ── Admin ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin-bottom:28px}
+    .stat-card{padding:20px 22px;display:flex;flex-direction:column;gap:4px}
+    .stat-lbl{font-size:.78rem;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+    .stat-val{font-size:2rem;font-weight:800;letter-spacing:-1px}
+    .sv-blue{color:var(--blue)} .sv-yellow{color:var(--yellow)} .sv-green{color:var(--green)} .sv-orange{color:var(--acl)}
+    .admin-table-wrap{overflow-x:auto;padding:0 24px 24px}
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    thead tr{background:rgba(249,115,22,.08);border-bottom:1px solid var(--gb)}
+    th{text-align:left;padding:12px 14px;font-weight:600;color:var(--tm);letter-spacing:.3px;text-transform:uppercase;font-size:.76rem}
+    td{padding:12px 14px;border-bottom:1px solid var(--gb);color:var(--tp);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .sel-status{
+      background:var(--bg2);color:var(--tp);border:1px solid var(--gb);
+      border-radius:var(--rs);padding:6px 10px;font-family:inherit;font-size:.85rem;cursor:pointer;outline:none;
+    }
+    .sel-status:focus{border-color:var(--accent)}
+    .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+    .admin-note{font-size:.78rem;color:var(--td);margin-bottom:18px}
+    .admin-sec-title{font-size:.9rem;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.5px;padding:24px 24px 0}
+
+    /* ── Pulse ── */
+    @keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 var(--gglow)}50%{box-shadow:0 0 0 8px transparent}}
+    .s-ready{animation:pulse-green 2s ease-in-out infinite}
+
+    /* ── Footer ── */
+    .site-footer{text-align:center;padding:32px 20px;color:var(--td);font-size:.82rem;border-top:1px solid var(--gb);margin-top:60px}
+
+    /* ── Admin Login Overlay ── */
+    .admin-overlay{
+      position:fixed;inset:0;z-index:999;
+      background:rgba(13,17,23,.97);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .admin-overlay.hidden{display:none}
+    .login-box{
+      width:100%;max-width:400px;margin:20px;
+      background:var(--card);border:1px solid var(--gb);
+      border-radius:var(--r);padding:40px 36px;
+      text-align:center;
+      animation:bounceIn .45s cubic-bezier(.4,0,.2,1) both;
+    }
+    .lock-icon{
+      font-size:3rem;display:block;margin-bottom:16px;
+      animation:float 3s ease-in-out infinite;
+    }
+    @keyframes float{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+    .login-title{font-size:1.4rem;font-weight:800;margin-bottom:6px}
+    .login-sub{font-size:.88rem;color:var(--tm);margin-bottom:28px}
+    .login-input-wrap{position:relative;margin-bottom:14px;width:100%}
+    .login-input-wrap input{
+      width:100%;display:block;
+      text-align:center;font-size:1.3rem;font-weight:700;
+      letter-spacing:.5rem;padding:14px 44px;
+      background:#ffffff;color:#111827;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:var(--rs);
+      outline:none;
+      transition:all var(--tr);
+      box-shadow:0 2px 8px rgba(0,0,0,.2);
+    }
+    .login-input-wrap input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--aglow);
+    }
+    .pw-toggle{
+      position:absolute;right:14px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;font-size:1.2rem;
+      color:#4b5563;transition:color var(--tr);
+      display:flex;align-items:center;justify-content:center;
+      z-index:2;
+    }
+    .pw-toggle:hover{color:#111827}
+    .login-error{
+      color:var(--red);font-size:.85rem;font-weight:600;
+      min-height:20px;margin-bottom:12px;
+    }
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-6px)}
+      80%{transform:translateX(6px)}
+    }
+    .login-box.shake{animation:shake .4s ease both}
+    .admin-hdr-row{
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:12px;margin-bottom:8px;
+    }
+
+    /* ── Responsive ── */
+    @media(max-width:900px){.two-col{grid-template-columns:1fr}}
+    @media(max-width:640px){
+      .nav{padding:10px 14px}
+      .nav-brand{font-size:1.1rem}
+      .hero{padding:36px 14px 22px}
+      .menu-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+      .cart-row{flex-wrap:wrap}
+      .confirm-wrap{padding:24px 18px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ HEADER ══════════════════════ -->
+<header class="site-header">
+  <nav class="nav">
+    <div class="nav-brand" onclick="showPage('menu')" id="brand">
+      <span>🍽️</span> ISM Canteen
+    </div>
+    <ul class="nav-links">
+      <li><button id="nav-menu"   onclick="showPage('menu')">🏠 Menu</button></li>
+      <li><button id="nav-cart"   onclick="showPage('cart')">🛒 Cart <span class="cart-badge" id="cart-badge" style="display:none">0</span></button></li>
+      <li><button id="nav-orders" onclick="showPage('orders')">📦 My Orders</button></li>
+      <li><button id="nav-admin"  onclick="showPage('admin')">⚙️ Admin</button></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ══════════════════════ PAGE: MENU ══════════════════════ -->
+<div class="page active" id="page-menu">
+  <section class="hero">
+    <h1>Today's Menu</h1>
+    <p>Pre-order your favourite meals and track your queue position in real time.</p>
+  </section>
+
+  <div id="menu-flash-zone" class="wrap"></div>
+
+  <main class="menu-section wrap">
+    <div class="cat-tabs" id="cat-tabs"></div>
+    <div class="menu-grid" id="menu-grid"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════ PAGE: CART ══════════════════════ -->
+<div class="page" id="page-cart">
+  <section class="hero" style="padding-bottom:20px">
+    <h1>Your Cart</h1>
+    <p id="cart-hero-sub">Review your items and place your order.</p>
+  </section>
+
+  <main class="page-content wrap">
+    <div id="cart-flash-zone"></div>
+    <div id="cart-body"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════ PAGE: CONFIRM ══════════════════════ -->
+<div class="page" id="page-confirm">
+  <main class="page-content wrap">
+    <div class="confirm-wrap card" id="confirm-content"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════ PAGE: ORDERS ══════════════════════ -->
+<div class="page" id="page-orders">
+  <section class="hero" style="padding-bottom:20px">
+    <h1>My Orders</h1>
+    <p>Real-time status for all your canteen pre-orders.</p>
+  </section>
+  <main class="page-content wrap">
+    <div id="orders-body"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════ PAGE: ADMIN ══════════════════════ -->
+<div class="page" id="page-admin">
+
+  <!-- Login Overlay -->
+  <div class="admin-overlay" id="admin-overlay">
+    <div class="login-box" id="login-box">
+      <span class="lock-icon">🔐</span>
+      <div class="login-title">Staff Access Only</div>
+      <div class="login-sub">Enter your admin password to continue</div>
+      <div class="login-input-wrap">
+        <input type="password" id="admin-pw" placeholder="••••"
+          maxlength="20" autocomplete="off"
+          onkeydown="if(event.key==='Enter') adminLogin()">
+        <button class="pw-toggle" id="pw-eye" onclick="togglePwEye()" title="Show/hide">👁️</button>
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn btn-primary btn-full" id="btn-admin-login" onclick="adminLogin()">🔓 Login</button>
+      <button class="btn btn-secondary btn-full" id="btn-admin-cancel" onclick="showPage('menu')" style="margin-top:8px">← Back to Menu</button>
+    </div>
+  </div>
+
+  <!-- Dashboard (shown after login) -->
+  <section class="hero" style="padding-bottom:20px">
+    <div class="admin-hdr-row">
+      <div>
+        <h1 style="margin-bottom:4px">Staff Dashboard</h1>
+        <p>Manage the queue – update order statuses as meals are prepared.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span id="admin-timer-display" style="font-size:.8rem;transition:color .3s"></span>
+        <button class="btn btn-danger btn-sm" id="btn-admin-logout" onclick="adminLogout()">🔒 Logout</button>
+      </div>
+    </div>
+  </section>
+  <main class="page-content wrap">
+    <div id="admin-flash-zone"></div>
+    <div id="admin-body"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer class="site-footer">
+  <p>NCSM301 &ndash; Web Development Laboratory &nbsp;|&nbsp; IIT (ISM) Dhanbad</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -46,6 +46,7 @@ try {
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
             status TEXT DEFAULT 'Received',
+            rating INTEGER DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 

@@ -175,6 +175,20 @@ switch ($action) {
         }
         break;
 
+    // RATE READY ORDER
+    case 'rate_order':
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $rating = (int)($_POST['rating'] ?? 0);
+
+        if ($orderId > 0 && $rating >= 1 && $rating <= 5) {
+            $stmt = $pdo->prepare("UPDATE orders SET rating = ? WHERE id = ?");
+            $stmt->execute([$rating, $orderId]);
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid rating (1-5 required)']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

@@ -45,6 +45,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Total</th>
                         <th>Time</th>
                         <th>Status</th>
+                        <th>Rating</th>
                     </tr>
                 </thead>
                 <tbody id="orders-tbody">
@@ -69,6 +70,24 @@ $orders = fetchAllOrdersWithItems($pdo);
                                     <span class="badge <?= $badgeClass ?>">
                                         <?= htmlspecialchars($order['status']) ?>
                                     </span>
+                                </td>
+                                <td>
+                                    <?php if ($order['status'] === 'Ready'): ?>
+                                        <?php if (!empty($order['rating'])): ?>
+                                            <span style="color: #f59e0b;"><?= str_repeat('★', (int)$order['rating']) ?></span>
+                                        <?php else: ?>
+                                            <select class="form-control rate-select" data-id="<?= $order['id'] ?>" style="width: auto; padding: 2px 6px; font-size: 0.8rem;">
+                                                <option value="">Rate</option>
+                                                <option value="5">5 ★★★★★</option>
+                                                <option value="4">4 ★★★★</option>
+                                                <option value="3">3 ★★★</option>
+                                                <option value="2">2 ★★</option>
+                                                <option value="1">1 ★</option>
+                                            </select>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span style="color: #94a3b8; font-size: 0.8rem;">-</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -128,6 +147,20 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+
+        // Rating select change
+        $(document).on('change', '.rate-select', function() {
+            var orderId = $(this).data('id');
+            var rating = $(this).val();
+            var $sel = $(this);
+            if (rating) {
+                $.post('api.php', { action: 'rate_order', order_id: orderId, rating: rating }, function(res) {
+                    if (res.success) {
+                        $sel.replaceWith('<span style="color: #f59e0b;">' + '★'.repeat(rating) + '</span>');
+                    }
+                }, 'json');
+            }
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

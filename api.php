@@ -167,8 +167,16 @@ switch ($action) {
         $allowedStatuses = ['Received', 'Preparing', 'Ready'];
 
         if ($orderId > 0 && in_array($status, $allowedStatuses, true)) {
+            $oldStatus = $pdo->query("SELECT status FROM orders WHERE id = $orderId")->fetchColumn() ?: 'Unknown';
+
             $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
             $stmt->execute([$status, $orderId]);
+
+            // Log status change to text file
+            $logEntry = date('[Y-m-d H:i:s] ') . "Order ID #{$orderId} status changed: '{$oldStatus}' -> '{$status}'
+";
+            file_put_contents(__DIR__ . '/status_changes.log', $logEntry, FILE_APPEND);
+
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid order ID or status']);

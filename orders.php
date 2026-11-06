@@ -44,6 +44,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Items Ordered</th>
                         <th>Total</th>
                         <th>Time</th>
+                        <th>Pickup</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -60,6 +61,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
+                                <td><strong><?= htmlspecialchars($order['pickup_time'] ?? '12:00 PM') ?></strong></td>
                                 <td>
                                     <?php 
                                         $badgeClass = 'badge-received';
@@ -112,6 +114,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                     <td>${o.items_summary || 'No items'}</td>
                                     <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>
                                     <td>${o.order_time}</td>
+                                    <td><strong>${o.pickup_time || '12:00 PM'}</strong></td>
                                     <td><span class="badge ${badgeClass}">${o.status}</span></td>
                                 </tr>
                             `;

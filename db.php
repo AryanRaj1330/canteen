@@ -46,6 +46,7 @@ try {
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
             status TEXT DEFAULT 'Received',
+            pickup_time TEXT DEFAULT '12:00 PM',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 

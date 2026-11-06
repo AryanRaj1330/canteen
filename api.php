@@ -106,6 +106,7 @@ switch ($action) {
     case 'checkout':
         $name = trim($_POST['customer_name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $pickupTime = trim($_POST['pickup_time'] ?? '12:00 PM');
 
         if (empty($_SESSION['cart'])) {
             echo json_encode(['success' => false, 'message' => 'Your cart is empty. Please add items.']);
@@ -128,9 +129,9 @@ switch ($action) {
 
         $pdo->beginTransaction();
         try {
-            // Insert into orders table
-            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, 'Received')");
-            $stmt->execute([$orderNo, $name, $phone, $total]);
+            // Insert into orders table with pickup time
+            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, pickup_time, status) VALUES (?, ?, ?, ?, ?, 'Received')");
+            $stmt->execute([$orderNo, $name, $phone, $total, $pickupTime]);
             $orderId = $pdo->lastInsertId();
 
             // Insert each item into order_items table

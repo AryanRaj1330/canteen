@@ -95,6 +95,17 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="pickup_time">Pickup Time</label>
+                        <select id="pickup_time" name="pickup_time" class="form-control" required>
+                            <option value="12:00 PM">12:00 PM</option>
+                            <option value="12:15 PM">12:15 PM</option>
+                            <option value="12:30 PM">12:30 PM</option>
+                            <option value="12:45 PM">12:45 PM</option>
+                            <option value="01:00 PM">01:00 PM</option>
+                        </select>
+                    </div>
+
                     <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
                         Place Pre-Order
                     </button>

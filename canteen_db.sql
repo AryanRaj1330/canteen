@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS orders (
     phone VARCHAR(20) NOT NULL,
     total_amount DECIMAL(8, 2) NOT NULL,
     status ENUM('Received', 'Preparing', 'Ready') DEFAULT 'Received',
+    pickup_time VARCHAR(20) DEFAULT '12:00 PM',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

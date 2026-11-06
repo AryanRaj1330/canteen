@@ -178,6 +178,12 @@ switch ($action) {
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);
+        $status = $_GET['status'] ?? 'All';
+        if ($status !== 'All') {
+            $orders = array_values(array_filter($orders, function($o) use ($status) {
+                return $o['status'] === $status;
+            }));
+        }
         echo json_encode(['success' => true, 'orders' => $orders]);
         break;
 

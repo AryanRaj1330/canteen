@@ -118,6 +118,14 @@ $orders = fetchAllOrdersWithItems($pdo);
             </div>
         </div>
 
+        <!-- Status Filter Buttons -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button class="btn btn-sm btn-primary filter-btn" data-status="All">All</button>
+            <button class="btn btn-sm btn-secondary filter-btn" data-status="Received">Received</button>
+            <button class="btn btn-sm btn-secondary filter-btn" data-status="Preparing">Preparing</button>
+            <button class="btn btn-sm btn-secondary filter-btn" data-status="Ready">Ready</button>
+        </div>
+
         <div class="table-container">
             <table class="table">
                 <thead>
@@ -168,6 +176,22 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Status filter buttons click
+        $('.filter-btn').on('click', function() {
+            $('.filter-btn').removeClass('btn-primary').addClass('btn-secondary');
+            $(this).removeClass('btn-secondary').addClass('btn-primary');
+            var filterStatus = $(this).data('status');
+
+            $('tbody tr').each(function() {
+                var rowStatus = $(this).find('.status-select').val();
+                if (filterStatus === 'All' || rowStatus === filterStatus) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

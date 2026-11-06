@@ -80,8 +80,10 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & map customer visit counts
 $orders = fetchAllOrdersWithItems($pdo);
+$visitStmt = $pdo->query("SELECT phone, COUNT(*) as visit_count FROM orders GROUP BY phone");
+$visitMap = $visitStmt->fetchAll(PDO::FETCH_KEY_PAIR);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -125,6 +127,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Order #</th>
                         <th>Customer</th>
                         <th>Phone</th>
+                        <th>Visits</th>
                         <th>Items Ordered</th>
                         <th>Total</th>
                         <th>Time</th>
@@ -142,6 +145,11 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
+                                <td>
+                                    <span class="badge" style="background:#e0f2fe; color:#0369a1;">
+                                        <?= ($visitMap[$order['phone']] ?? 1) ?> order(s)
+                                    </span>
+                                </td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>

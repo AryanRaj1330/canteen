@@ -97,6 +97,12 @@ switch ($action) {
         echo json_encode(['success' => true, 'cart' => getCartSummary()]);
         break;
 
+    // CLEAR CART
+    case 'clear_cart':
+        $_SESSION['cart'] = [];
+        echo json_encode(['success' => true, 'cart' => getCartSummary()]);
+        break;
+
     // 4. GET CART STATUS
     case 'get_cart':
         echo json_encode(['success' => true, 'cart' => getCartSummary()]);

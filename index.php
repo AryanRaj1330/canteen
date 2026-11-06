@@ -98,6 +98,9 @@ foreach ($items as $item) {
                     <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
                         Place Pre-Order
                     </button>
+                    <button type="button" id="clear-cart-btn" class="btn btn-danger-outline" style="width: 100%; margin-top: 8px;">
+                        Clear Cart
+                    </button>
                 </form>
             </div>
         </div>
@@ -178,6 +181,17 @@ foreach ($items as $item) {
                     renderCart(res.cart);
                 }
             }, 'json');
+        });
+
+        // Clear Cart
+        $('#clear-cart-btn').on('click', function() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                $.post('api.php', { action: 'clear_cart' }, function(res) {
+                    if (res.success) {
+                        renderCart(res.cart);
+                    }
+                }, 'json');
+            }
         });
 
         // 4. Remove Item from Cart

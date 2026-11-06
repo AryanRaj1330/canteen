@@ -80,6 +80,27 @@ if (!$isLoggedIn) {
     exit;
 }
 
+// Handle Change PIN submission
+$pinMsg = '';
+$pinErr = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_pin') {
+    $currentPin = $_SESSION['current_pin'] ?? STAFF_PIN;
+    $oldPin = trim($_POST['old_pin'] ?? '');
+    $newPin = trim($_POST['new_pin'] ?? '');
+    $confirmPin = trim($_POST['confirm_pin'] ?? '');
+
+    if ($oldPin !== $currentPin) {
+        $pinErr = 'Old PIN does not match our records.';
+    } elseif (strlen($newPin) < 4) {
+        $pinErr = 'New PIN must be at least 4 digits.';
+    } elseif ($newPin !== $confirmPin) {
+        $pinErr = 'New PIN and Confirmation PIN do not match.';
+    } else {
+        $_SESSION['current_pin'] = $newPin;
+        $pinMsg = 'PIN successfully changed to ' . htmlspecialchars($newPin) . '!';
+    }
+}
+
 // 4. Fetch all orders for authenticated staff view
 $orders = fetchAllOrdersWithItems($pdo);
 ?>
@@ -116,6 +137,34 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <?php if (!empty($pinMsg)): ?>
+            <div class="alert alert-success"><span><?= htmlspecialchars($pinMsg) ?></span></div>
+        <?php endif; ?>
+        <?php if (!empty($pinErr)): ?>
+            <div class="alert alert-danger"><span><?= htmlspecialchars($pinErr) ?></span></div>
+        <?php endif; ?>
+
+        <!-- Change PIN Card -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Change Staff PIN</h3>
+            <form method="POST" action="admin.php" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                <input type="hidden" name="action" value="change_pin">
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #475569;">Old PIN</label>
+                    <input type="password" name="old_pin" class="form-control" placeholder="••••" required style="width: 130px;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #475569;">New PIN</label>
+                    <input type="password" name="new_pin" class="form-control" placeholder="••••" required style="width: 130px;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #475569;">Confirm PIN</label>
+                    <input type="password" name="confirm_pin" class="form-control" placeholder="••••" required style="width: 130px;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 8px 16px;">Update PIN</button>
+            </form>
         </div>
 
         <div class="table-container">

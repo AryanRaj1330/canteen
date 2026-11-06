@@ -32,7 +32,12 @@ $orders = fetchAllOrdersWithItems($pdo);
                     Auto-updating every 3 seconds &bull; Last updated: <span id="last-updated">Just now</span>
                 </p>
             </div>
-            <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh Now</button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <label style="font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <input type="checkbox" id="show-all-toggle"> Show All Orders
+                </label>
+                <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh</button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -95,7 +100,8 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // AJAX function to fetch live order list from api.php
         function refreshOrders() {
-            $.get('api.php', { action: 'get_orders' }, function(res) {
+            var showAll = $('#show-all-toggle').is(':checked') ? 1 : 0;
+            $.get('api.php', { action: 'get_orders', show_all: showAll }, function(res) {
                 if (res.success) {
                     var $tbody = $('#orders-tbody');
                     $tbody.empty();
@@ -128,6 +134,11 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+
+        // Show all toggle change
+        $('#show-all-toggle').on('change', function() {
+            refreshOrders();
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

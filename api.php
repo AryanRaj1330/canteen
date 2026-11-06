@@ -175,6 +175,23 @@ switch ($action) {
         }
         break;
 
+    // DELETE ORDER (Staff Only)
+    case 'delete_order':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized: Staff login required.']);
+            exit;
+        }
+
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        if ($orderId > 0) {
+            $stmt = $pdo->prepare("DELETE FROM orders WHERE id = ?");
+            $stmt->execute([$orderId]);
+            echo json_encode(['success' => true, 'message' => 'Order deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid order ID']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

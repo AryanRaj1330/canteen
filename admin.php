@@ -129,6 +129,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Total</th>
                         <th>Time</th>
                         <th>Update Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,6 +156,9 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         <span class="status-feedback" id="feedback-<?= $order['id'] ?>" style="display: none;">Saved ✓</span>
                                     </div>
                                 </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger-outline delete-order-btn" data-id="<?= $order['id'] ?>">Delete</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -168,6 +172,21 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Handle Delete Order button
+        $('.delete-order-btn').on('click', function() {
+            var orderId = $(this).data('id');
+            var $row = $(this).closest('tr');
+            if (confirm('Delete order #' + orderId + '? All line items will be removed.')) {
+                $.post('api.php', { action: 'delete_order', order_id: orderId }, function(res) {
+                    if (res.success) {
+                        $row.fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

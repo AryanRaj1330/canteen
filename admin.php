@@ -45,6 +45,9 @@ if (!$isLoggedIn) {
         </ul>
     </nav>
 
+    <!-- Admin Toast Container -->
+    <div id="admin-toast-box" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px;"></div>
+
     <div class="container">
         <div class="login-card">
             <div class="lock-icon">🔒</div>
@@ -168,6 +171,15 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+        // Styled Toast Notification for admin actions
+        function showToast(msg, isSuccess) {
+            var bg = isSuccess ? '#16a34a' : '#dc2626';
+            var $toast = $('<div style="background:' + bg + '; color:#fff; padding:12px 20px; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.15); font-weight:500;"></div>').text(msg);
+            $('#admin-toast-box').append($toast);
+            setTimeout(function() {
+                $toast.fadeOut(400, function() { $(this).remove(); });
+            }, 3000);
+        }
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {
@@ -187,9 +199,10 @@ $orders = fetchAllOrdersWithItems($pdo);
 
                 if (res.success) {
                     $feedback.text('Saved ✓').css('color', '#15803d').fadeIn(200).delay(1500).fadeOut(400);
+                    showToast('Order #' + orderId + ' status updated to ' + newStatus, true);
                 } else {
                     $feedback.text('Failed ✕').css('color', '#dc2626').fadeIn(200);
-                    alert(res.message || 'Status update failed');
+                    showToast(res.message || 'Status update failed', false);
                 }
             }, 'json').fail(function() {
                 $dropdown.prop('disabled', false);

@@ -39,11 +39,19 @@ foreach ($items as $item) {
             <!-- Left Column: Menu Items -->
             <div class="menu-section">
                 <h1 class="page-title">Available Menu</h1>
+                <!-- Category Filter Tabs loaded dynamically from PHP -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <button class="btn btn-primary cat-tab-btn active" data-cat="all">All</button>
+                    <?php foreach (array_keys($categories) as $cName): ?>
+                        <button class="btn btn-secondary cat-tab-btn" data-cat="<?= htmlspecialchars($cName) ?>"><?= htmlspecialchars($cName) ?></button>
+                    <?php endforeach; ?>
+                </div>
 
                 <?php if (empty($categories)): ?>
                     <p>No menu items available right now. Please check back later.</p>
                 <?php else: ?>
                     <?php foreach ($categories as $categoryName => $catItems): ?>
+                        <div class="category-group" data-cat="<?= htmlspecialchars($categoryName) ?>">
                         <h2 style="font-size: 1.25rem; margin: 20px 0 12px; color: #34495e; border-bottom: 2px solid #ddd; padding-bottom: 4px;">
                             <?= htmlspecialchars($categoryName) ?>
                         </h2>
@@ -60,6 +68,7 @@ foreach ($items as $item) {
                                     </button>
                                 </div>
                             <?php endforeach; ?>
+                        </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -144,6 +153,25 @@ foreach ($items as $item) {
                 });
             }
         }
+
+        // Category tab filter
+        $('.cat-tab-btn').on('click', function() {
+            $('.cat-tab-btn').removeClass('btn-primary').addClass('btn-secondary');
+            $(this).removeClass('btn-secondary').addClass('btn-primary');
+            var selectedCat = $(this).data('cat');
+
+            if (selectedCat === 'all') {
+                $('.category-group').show();
+            } else {
+                $('.category-group').each(function() {
+                    if ($(this).data('cat') === selectedCat) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
 
         // 1. Initial Load: Fetch existing cart on page load
         $.get('api.php', { action: 'get_cart' }, function(res) {

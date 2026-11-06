@@ -20,7 +20,8 @@ $orders = fetchAllOrdersWithItems($pdo);
         <ul class="nav-links">
             <li><a href="index.php">Menu & Order</a></li>
             <li><a href="orders.php" class="active">Queue Status</a></li>
-            <li><a href="admin.php">Staff Dashboard</a></li>
+            <?php $pendingCountNav = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE status != 'Ready'")->fetchColumn(); ?>
+            <li><a href="admin.php">Staff Dashboard <span class="badge" style="background: #dc2626; color: #fff; border-radius: 10px; padding: 2px 7px; font-size: 0.75rem;"><?= $pendingCountNav ?></span></a></li>
         </ul>
     </nav>
 

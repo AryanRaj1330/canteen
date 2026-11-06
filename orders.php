@@ -18,7 +18,7 @@ $orders = fetchAllOrdersWithItems($pdo);
     <nav class="navbar">
         <div class="brand">Campus Canteen</div>
         <ul class="nav-links">
-            <li><a href="index.php">Menu & Order</a></li>
+            <li><a href="index.php">Menu & Order <span class="nav-cart-badge badge" style="background:#e11d48;color:#fff;border-radius:10px;padding:2px 7px;font-size:0.75rem;display:none;">0</span></a></li>
             <li><a href="orders.php" class="active">Queue Status</a></li>
             <li><a href="admin.php">Staff Dashboard</a></li>
         </ul>
@@ -92,6 +92,13 @@ $orders = fetchAllOrdersWithItems($pdo);
                 default: return 'badge-received';
             }
         }
+
+        // Update navbar cart badge
+        $.get('api.php', { action: 'get_cart' }, function(res) {
+            if (res.success && res.cart.count > 0) {
+                $('.nav-cart-badge').text(res.cart.count).show();
+            }
+        }, 'json');
 
         // AJAX function to fetch live order list from api.php
         function refreshOrders() {

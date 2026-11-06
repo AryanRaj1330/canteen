@@ -25,7 +25,7 @@ foreach ($items as $item) {
     <nav class="navbar">
         <div class="brand">Campus Canteen</div>
         <ul class="nav-links">
-            <li><a href="index.php" class="active">Menu & Order</a></li>
+            <li><a href="index.php" class="active">Menu & Order <span class="nav-cart-badge badge" style="background:#e11d48;color:#fff;border-radius:10px;padding:2px 7px;font-size:0.75rem;display:none;">0</span></a></li>
             <li><a href="orders.php">Queue Status</a></li>
             <li><a href="admin.php">Staff Dashboard</a></li>
         </ul>
@@ -116,6 +116,11 @@ foreach ($items as $item) {
 
             $('#cart-total').text(cartData.total);
             $('#cart-count-badge').text('(' + cartData.count + ' items)');
+            if (cartData.count > 0) {
+                $('.nav-cart-badge').text(cartData.count).show();
+            } else {
+                $('.nav-cart-badge').hide();
+            }
 
             // Toggle Checkout button depending on items in cart
             if (cartData.items.length === 0) {

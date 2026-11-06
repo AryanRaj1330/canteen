@@ -39,7 +39,7 @@ if (!$isLoggedIn) {
     <nav class="navbar">
         <div class="brand">Campus Canteen &mdash; Staff Panel</div>
         <ul class="nav-links">
-            <li><a href="index.php">Menu & Order</a></li>
+            <li><a href="index.php">Menu & Order <span class="nav-cart-badge badge" style="background:#e11d48;color:#fff;border-radius:10px;padding:2px 7px;font-size:0.75rem;display:none;">0</span></a></li>
             <li><a href="orders.php">Queue Status</a></li>
             <li><a href="admin.php" class="active">Staff Dashboard</a></li>
         </ul>

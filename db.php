@@ -74,6 +74,15 @@ try {
     }
 }
 
+// Helper function to mask phone numbers (e.g. 98****3210)
+function maskPhone($phone) {
+    $p = trim($phone);
+    if (strlen($p) >= 10) {
+        return substr($p, 0, 2) . '****' . substr($p, -4);
+    }
+    return $p;
+}
+
 // Helper function to fetch all orders with their ordered items (works universally)
 function fetchAllOrdersWithItems($pdo) {
     $orders = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();
@@ -85,6 +94,7 @@ function fetchAllOrdersWithItems($pdo) {
     }
 
     foreach ($orders as &$order) {
+        $order['phone'] = maskPhone($order['phone']);
         $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
         $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
     }

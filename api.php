@@ -175,6 +175,48 @@ switch ($action) {
         }
         break;
 
+    // REMOVE ITEM FROM RECEIVED ORDER AND RECALCULATE TOTAL IN TRANSACTION
+    case 'remove_order_item':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $orderItemId = (int)($_POST['order_item_id'] ?? 0);
+        $pdo->beginTransaction();
+        try {
+            $oiStmt = $pdo->prepare("SELECT oi.order_id, o.status FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE oi.id = ?");
+            $oiStmt->execute([$orderItemId]);
+            $info = $oiStmt->fetch();
+
+            if (!$info || $info['status'] !== 'Received') {
+                $pdo->rollBack();
+                echo json_encode(['success' => false, 'message' => 'Items can only be removed while order is in Received status.']);
+                exit;
+            }
+
+            $orderId = (int)$info['order_id'];
+
+            // Delete item
+            $del = $pdo->prepare("DELETE FROM order_items WHERE id = ?");
+            $del->execute([$orderItemId]);
+
+            // Recalculate total
+            $sumStmt = $pdo->prepare("SELECT COALESCE(SUM(price * quantity), 0) FROM order_items WHERE order_id = ?");
+            $sumStmt->execute([$orderId]);
+            $newTotal = (float)$sumStmt->fetchColumn();
+
+            $upOrder = $pdo->prepare("UPDATE orders SET total_amount = ? WHERE id = ?");
+            $upOrder->execute([$newTotal, $orderId]);
+
+            $pdo->commit();
+            echo json_encode(['success' => true, 'new_total' => number_format($newTotal, 2, '.', '')]);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

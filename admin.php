@@ -80,8 +80,13 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders and line items
 $orders = fetchAllOrdersWithItems($pdo);
+$rawItems = $pdo->query("SELECT * FROM order_items")->fetchAll();
+$rawItemsByOrder = [];
+foreach ($rawItems as $ri) {
+    $rawItemsByOrder[$ri['order_id']][] = $ri;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -142,7 +147,20 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
-                                <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
+                                <td>
+                                    <?php if (!empty($rawItemsByOrder[$order['id']])): ?>
+                                        <?php foreach ($rawItemsByOrder[$order['id']] as $ritem): ?>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                                <span><?= htmlspecialchars($ritem['item_name']) ?> (x<?= $ritem['quantity'] ?>)</span>
+                                                <?php if ($order['status'] === 'Received'): ?>
+                                                    <button class="btn btn-sm btn-danger-outline remove-order-item-btn" data-item-id="<?= $ritem['id'] ?>" style="margin-left: 6px; padding: 1px 5px; font-size: 0.75rem;" title="Remove this item">✕</button>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span style="color: #94a3b8;">No items</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
                                 <td>
@@ -168,6 +186,21 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Remove item from received order
+        $('.remove-order-item-btn').on('click', function() {
+            var orderItemId = $(this).data('item-id');
+            if (confirm('Remove this item and recalculate order total?')) {
+                $.post('api.php', { action: 'remove_order_item', order_item_id: orderItemId }, function(res) {
+                    if (res.success) {
+                        alert('Item removed! New total: ₹' + res.new_total);
+                        window.location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

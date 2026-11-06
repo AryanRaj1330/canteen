@@ -52,7 +52,10 @@ foreach ($items as $item) {
                                 <div class="item-card">
                                     <div>
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
-                                        <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
+                                        <div class="item-name" style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: <?= (!isset($item['is_veg']) || $item['is_veg']) ? '#16a34a' : '#dc2626' ?>;" title="<?= (!isset($item['is_veg']) || $item['is_veg']) ? 'Vegetarian' : 'Non-Vegetarian' ?>"></span>
+                                            <?= htmlspecialchars($item['name']) ?>
+                                        </div>
                                         <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
                                     </div>
                                     <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">

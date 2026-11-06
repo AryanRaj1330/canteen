@@ -4,6 +4,17 @@
 CREATE DATABASE IF NOT EXISTS canteen_db;
 USE canteen_db;
 
+CREATE TABLE IF NOT EXISTS staff (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'kitchen'
+);
+
+INSERT INTO staff (username, password_hash, role) VALUES 
+('kitchen', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lR5.J1iK7hW5E2t3e6mF7zR8m5xGm', 'kitchen'),
+('manager', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lR5.J1iK7hW5E2t3e6mF7zR8m5xGm', 'manager');
+
 -- 1. Table: items
 CREATE TABLE IF NOT EXISTS items (
     id INT AUTO_INCREMENT PRIMARY KEY,

@@ -175,6 +175,23 @@ switch ($action) {
         }
         break;
 
+    // DELETE ORDER (Manager Only)
+    case 'delete_order':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        if (($_SESSION['staff_role'] ?? '') !== 'manager') {
+            echo json_encode(['success' => false, 'message' => 'Forbidden: Only managers can delete orders']);
+            exit;
+        }
+
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $stmt = $pdo->prepare("DELETE FROM orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        echo json_encode(['success' => true]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

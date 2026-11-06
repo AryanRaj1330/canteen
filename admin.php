@@ -8,15 +8,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
-// 2. Handle Login submission
+// 2. Handle Login submission with roles
 $loginError = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
-    if (trim($_POST['staff_pin']) === STAFF_PIN) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
+    $uname = trim($_POST['username'] ?? '');
+    $pwd = trim($_POST['password'] ?? '');
+
+    $stmt = $pdo->prepare("SELECT * FROM staff WHERE username = ?");
+    $stmt->execute([$uname]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($pwd, $user['password_hash'])) {
         $_SESSION['staff_logged_in'] = true;
+        $_SESSION['staff_user'] = $user['username'];
+        $_SESSION['staff_role'] = $user['role'];
         header('Location: admin.php');
         exit;
     } else {
-        $loginError = 'Incorrect PIN. Please try again.';
+        $loginError = 'Invalid credentials. Use kitchen/admin or manager/admin.';
     }
 }
 
@@ -60,16 +69,20 @@ if (!$isLoggedIn) {
             <?php endif; ?>
 
             <form method="POST" action="admin.php">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label for="staff_pin">Security PIN</label>
-                    <input type="password" id="staff_pin" name="staff_pin" class="form-control pin-input" maxlength="10" placeholder="••••" required autofocus autocomplete="off">
+                <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="kitchen or manager" required autofocus>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem;">
-                    Unlock Dashboard
+                    Sign In
                 </button>
             </form>
             <p style="margin-top: 16px; font-size: 0.8rem; color: #888;">
-                Default PIN: <code>1234</code> (configurable in <code>db.php</code>)
+                Roles: <code>kitchen / admin</code> or <code>manager / admin</code>
             </p>
         </div>
     </div>
@@ -129,6 +142,9 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Total</th>
                         <th>Time</th>
                         <th>Update Status</th>
+                        <?php if (($_SESSION['staff_role'] ?? '') === 'manager'): ?>
+                            <th>Delete</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,6 +171,11 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         <span class="status-feedback" id="feedback-<?= $order['id'] ?>" style="display: none;">Saved ✓</span>
                                     </div>
                                 </td>
+                                <?php if (($_SESSION['staff_role'] ?? '') === 'manager'): ?>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger-outline delete-btn" data-id="<?= $order['id'] ?>">Delete</button>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -168,6 +189,21 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Handle delete order
+        $('.delete-btn').on('click', function() {
+            var orderId = $(this).data('id');
+            var $row = $(this).closest('tr');
+            if (confirm('Manager Action: Delete order #' + orderId + '?')) {
+                $.post('api.php', { action: 'delete_order', order_id: orderId }, function(res) {
+                    if (res.success) {
+                        $row.fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

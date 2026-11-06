@@ -78,9 +78,15 @@ foreach ($items as $item) {
                 </ul>
 
                 <!-- Cart Total Box -->
-                <div class="cart-total-box">
-                    <span>Total Amount:</span>
-                    <span>₹<span id="cart-total">0.00</span></span>
+                <div class="cart-total-box" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div id="combo-row" style="display: none; justify-content: space-between; font-size: 0.85rem; color: #16a34a; font-weight: 600;">
+                        <span>Combo Offer (Burger + Coffee):</span>
+                        <span>-₹10.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                        <span>Total Amount:</span>
+                        <span>₹<span id="cart-total">0.00</span></span>
+                    </div>
                 </div>
 
                 <!-- Customer Details & Checkout Form -->
@@ -114,6 +120,11 @@ foreach ($items as $item) {
             var $list = $('#cart-items-list');
             $list.empty();
 
+            if (parseFloat(cartData.combo_discount) > 0) {
+                $('#combo-row').css('display', 'flex');
+            } else {
+                $('#combo-row').hide();
+            }
             $('#cart-total').text(cartData.total);
             $('#cart-count-badge').text('(' + cartData.count + ' items)');
 

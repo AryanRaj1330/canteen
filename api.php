@@ -28,9 +28,21 @@ function getCartSummary() {
         ];
     }
 
+    // Combo offer: Veg Burger + Cold Coffee = Rs. 10 off
+    $hasBurger = false;
+    $hasCoffee = false;
+    foreach ($cart as $it) {
+        if (stripos($it['name'], 'Veg Burger') !== false) $hasBurger = true;
+        if (stripos($it['name'], 'Cold Coffee') !== false) $hasCoffee = true;
+    }
+    $comboDiscount = ($hasBurger && $hasCoffee) ? 10.00 : 0.00;
+    $finalTotal = max(0, $total - $comboDiscount);
+
     return [
         'items' => $items,
-        'total' => number_format($total, 2, '.', ''),
+        'subtotal' => number_format($total, 2, '.', ''),
+        'combo_discount' => number_format($comboDiscount, 2, '.', ''),
+        'total' => number_format($finalTotal, 2, '.', ''),
         'count' => $count
     ];
 }

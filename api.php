@@ -28,9 +28,13 @@ function getCartSummary() {
         ];
     }
 
+    $gst = round($total * 0.05, 2);
+    $grandTotal = $total + $gst;
     return [
         'items' => $items,
-        'total' => number_format($total, 2, '.', ''),
+        'subtotal' => number_format($total, 2, '.', ''),
+        'gst' => number_format($gst, 2, '.', ''),
+        'total' => number_format($grandTotal, 2, '.', ''),
         'count' => $count
     ];
 }
@@ -128,9 +132,13 @@ switch ($action) {
 
         $pdo->beginTransaction();
         try {
-            // Insert into orders table
-            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, 'Received')");
-            $stmt->execute([$orderNo, $name, $phone, $total]);
+            // Calculate GST and Grand Total
+            $gst = round($total * 0.05, 2);
+            $grandTotal = $total + $gst;
+
+            // Insert into orders table with GST
+            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, gst, status) VALUES (?, ?, ?, ?, ?, 'Received')");
+            $stmt->execute([$orderNo, $name, $phone, $grandTotal, $gst]);
             $orderId = $pdo->lastInsertId();
 
             // Insert each item into order_items table

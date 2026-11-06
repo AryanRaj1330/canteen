@@ -78,9 +78,19 @@ foreach ($items as $item) {
                 </ul>
 
                 <!-- Cart Total Box -->
-                <div class="cart-total-box">
-                    <span>Total Amount:</span>
-                    <span>₹<span id="cart-total">0.00</span></span>
+                <div class="cart-total-box" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #64748b;">
+                        <span>Subtotal:</span>
+                        <span>₹<span id="cart-subtotal">0.00</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #64748b;">
+                        <span>GST (5%):</span>
+                        <span>₹<span id="cart-gst">0.00</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px;">
+                        <span>Grand Total:</span>
+                        <span>₹<span id="cart-total">0.00</span></span>
+                    </div>
                 </div>
 
                 <!-- Customer Details & Checkout Form -->
@@ -114,6 +124,8 @@ foreach ($items as $item) {
             var $list = $('#cart-items-list');
             $list.empty();
 
+            $('#cart-subtotal').text(cartData.subtotal || cartData.total);
+            $('#cart-gst').text(cartData.gst || '0.00');
             $('#cart-total').text(cartData.total);
             $('#cart-count-badge').text('(' + cartData.count + ' items)');
 

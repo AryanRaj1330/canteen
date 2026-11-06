@@ -45,6 +45,7 @@ try {
             customer_name TEXT NOT NULL,
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
+            gst REAL DEFAULT 0.00,
             status TEXT DEFAULT 'Received',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );

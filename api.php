@@ -50,12 +50,16 @@ switch ($action) {
         if (isset($_SESSION['cart'][$itemId])) {
             $_SESSION['cart'][$itemId]['qty'] += 1;
         } else {
-            // Verify item from database
-            $stmt = $pdo->prepare("SELECT id, name, price FROM items WHERE id = ? AND is_available = 1");
+            // Verify item from database and stock
+            $stmt = $pdo->prepare("SELECT id, name, price, stock FROM items WHERE id = ? AND is_available = 1");
             $stmt->execute([$itemId]);
             $item = $stmt->fetch();
 
             if ($item) {
+                if (isset($item['stock']) && (int)$item['stock'] <= 0) {
+                    echo json_encode(['success' => false, 'message' => 'Sorry, this item is out of stock.']);
+                    exit;
+                }
                 $_SESSION['cart'][$itemId] = [
                     'id'    => (int)$item['id'],
                     'name'  => $item['name'],

@@ -52,12 +52,23 @@ foreach ($items as $item) {
                                 <div class="item-card">
                                     <div>
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
-                                        <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
+                                        <div class="item-name">
+                                            <?= htmlspecialchars($item['name']) ?>
+                                            <?php if (isset($item['stock']) && (int)$item['stock'] <= 0): ?>
+                                                <span class="badge" style="background: #fee2e2; color: #b91c1c; font-size: 0.7rem; margin-left: 4px;">Out of Stock</span>
+                                            <?php endif; ?>
+                                        </div>
                                         <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
                                     </div>
-                                    <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">
-                                        + Add to Cart
-                                    </button>
+                                    <?php if (isset($item['stock']) && (int)$item['stock'] <= 0): ?>
+                                        <button class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed;">
+                                            Out of Stock
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">
+                                            + Add to Cart
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>

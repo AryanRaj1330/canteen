@@ -191,17 +191,23 @@ foreach ($items as $item) {
             }, 'json');
         });
 
-        // 5. Submit Pre-Order (Checkout)
+        // 5. Submit Pre-Order (Checkout) with loading state & timeout retry
         $('#checkout-form').on('submit', function(e) {
             e.preventDefault();
 
             var $btn = $('#place-order-btn');
-            $btn.prop('disabled', true).text('Placing Order...');
+            $btn.prop('disabled', true).html('⏳ Placing order... Please wait');
 
             var formData = $(this).serialize() + '&action=checkout';
 
-            $.post('api.php', formData, function(res) {
-                $btn.text('Place Pre-Order');
+            $.ajax({
+                url: 'api.php',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                timeout: 5000,
+                success: function(res) {
+                    $btn.html('Place Pre-Order');
 
                 if (res.success) {
                     // Show success banner with direct link to live queue
@@ -226,9 +232,15 @@ foreach ($items as $item) {
                     $btn.prop('disabled', false);
                     alert(res.message || 'Checkout failed');
                 }
-            }, 'json').fail(function() {
-                $btn.prop('disabled', false).text('Place Pre-Order');
-                alert('Server error occurred during checkout.');
+                },
+                error: function(xhr, status) {
+                    $btn.prop('disabled', false).html('Retry Order ↻');
+                    var msg = (status === 'timeout') 
+                        ? '⏱ Server timeout! The connection took too long. Please click Retry Order.'
+                        : 'Server error occurred during checkout. Please try again.';
+                    $('#order-alert').html('<div class="alert alert-danger"><strong>Error:</strong> ' + msg + '</div>').show();
+                    $('html, body').animate({ scrollTop: 0 }, 'fast');
+                }
             });
         });
 

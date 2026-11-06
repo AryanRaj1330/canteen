@@ -75,6 +75,9 @@ $orders = fetchAllOrdersWithItems($pdo);
                     <?php endif; ?>
                 </tbody>
             </table>
+            <div style="text-align: center; padding: 14px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <button id="load-more-btn" class="btn btn-secondary btn-sm" style="padding: 6px 18px;">Load More Orders</button>
+            </div>
         </div>
     </div>
 
@@ -93,9 +96,12 @@ $orders = fetchAllOrdersWithItems($pdo);
             }
         }
 
+        var currentOffset = 0;
+        var limit = 20;
+
         // AJAX function to fetch live order list from api.php
         function refreshOrders() {
-            $.get('api.php', { action: 'get_orders' }, function(res) {
+            $.get('api.php', { action: 'get_orders', limit: currentOffset + limit, offset: 0 }, function(res) {
                 if (res.success) {
                     var $tbody = $('#orders-tbody');
                     $tbody.empty();
@@ -128,6 +134,34 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+
+        // Load more orders
+        $('#load-more-btn').on('click', function() {
+            currentOffset += limit;
+            $.get('api.php', { action: 'get_orders', limit: limit, offset: currentOffset }, function(res) {
+                if (res.success && res.orders.length > 0) {
+                    $.each(res.orders, function(index, o) {
+                        var badgeClass = getBadgeClass(o.status);
+                        var row = `
+                            <tr>
+                                <td><strong>${o.order_no}</strong></td>
+                                <td>${o.customer_name}</td>
+                                <td>${o.items_summary || 'No items'}</td>
+                                <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>
+                                <td>${o.order_time}</td>
+                                <td><span class="badge ${badgeClass}">${o.status}</span></td>
+                            </tr>
+                        `;
+                        $('#orders-tbody').append(row);
+                    });
+                    if (!res.has_more) {
+                        $('#load-more-btn').prop('disabled', true).text('No More Orders');
+                    }
+                } else {
+                    $('#load-more-btn').prop('disabled', true).text('No More Orders');
+                }
+            }, 'json');
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

@@ -177,8 +177,29 @@ switch ($action) {
 
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
-        $orders = fetchAllOrdersWithItems($pdo);
-        echo json_encode(['success' => true, 'orders' => $orders]);
+        $limit = max(1, (int)($_GET['limit'] ?? 20));
+        $offset = max(0, (int)($_GET['offset'] ?? 0));
+
+        $stmt = $pdo->prepare("SELECT * FROM orders ORDER BY id DESC LIMIT ? OFFSET ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $orders = $stmt->fetchAll();
+
+        $items = $pdo->query("SELECT * FROM order_items")->fetchAll();
+        $itemsMap = [];
+        foreach ($items as $item) {
+            $itemsMap[$item['order_id']][] = $item['item_name'] . ' (x' . $item['quantity'] . ')';
+        }
+        foreach ($orders as &$order) {
+            $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
+            $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
+        }
+
+        $totalCount = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        $hasMore = ($offset + count($orders)) < $totalCount;
+
+        echo json_encode(['success' => true, 'orders' => $orders, 'has_more' => $hasMore]);
         break;
 
     default:

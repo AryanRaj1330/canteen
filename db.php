@@ -36,7 +36,8 @@ try {
             name TEXT NOT NULL,
             category TEXT NOT NULL,
             price REAL NOT NULL,
-            is_available INTEGER DEFAULT 1
+            is_available INTEGER DEFAULT 1,
+            prep_time_minutes INTEGER DEFAULT 5
         );
 
         CREATE TABLE IF NOT EXISTS orders (
@@ -63,13 +64,13 @@ try {
     $count = $pdo->query("SELECT COUNT(*) FROM items")->fetchColumn();
     if ($count == 0) {
         $pdo->exec("
-            INSERT INTO items (name, category, price, is_available) VALUES
-            ('Veg Burger', 'Food', 50.00, 1),
-            ('Chicken Sandwich', 'Food', 80.00, 1),
-            ('Hot Samosa (2 pcs)', 'Food', 25.00, 1),
-            ('Masala Dosa', 'Food', 60.00, 1),
-            ('Cold Coffee', 'Beverages', 40.00, 1),
-            ('Lemon Iced Tea', 'Beverages', 30.00, 1);
+            INSERT INTO items (name, category, price, is_available, prep_time_minutes) VALUES
+            ('Veg Burger', 'Food', 50.00, 1, 8),
+            ('Chicken Sandwich', 'Food', 80.00, 1, 10),
+            ('Hot Samosa (2 pcs)', 'Food', 25.00, 1, 4),
+            ('Masala Dosa', 'Food', 60.00, 1, 12),
+            ('Cold Coffee', 'Beverages', 40.00, 1, 5),
+            ('Lemon Iced Tea', 'Beverages', 30.00, 1, 3);
         ");
     }
 }

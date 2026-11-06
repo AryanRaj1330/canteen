@@ -141,13 +141,21 @@ switch ($action) {
 
             $pdo->commit();
 
+            // Calculate estimated ready time based on MAX preparation time of ordered items
+            $itemIds = array_keys($_SESSION['cart']);
+            $inClause = implode(',', array_map('intval', $itemIds));
+            $maxPrep = (int)$pdo->query("SELECT COALESCE(MAX(prep_time_minutes), 5) FROM items WHERE id IN ($inClause)")->fetchColumn();
+            $estReadyTime = date('h:i A', strtotime("+{$maxPrep} minutes"));
+
             // Clear session cart
             $_SESSION['cart'] = [];
 
             echo json_encode([
-                'success'  => true,
-                'order_no' => $orderNo,
-                'message'  => "Order placed successfully! Your Order No is #$orderNo"
+                'success'        => true,
+                'order_no'       => $orderNo,
+                'est_ready_time' => $estReadyTime,
+                'prep_mins'      => $maxPrep,
+                'message'        => "Order placed successfully! Your Order No is #$orderNo"
             ]);
         } catch (Exception $e) {
             $pdo->rollBack();

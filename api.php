@@ -175,6 +175,20 @@ switch ($action) {
         }
         break;
 
+    // TOGGLE FAVORITE ITEM IN SESSION
+    case 'toggle_favorite':
+        if (!isset($_SESSION['favorites'])) $_SESSION['favorites'] = [];
+        $id = (int)($_POST['item_id'] ?? 0);
+        if (in_array($id, $_SESSION['favorites'])) {
+            $_SESSION['favorites'] = array_values(array_diff($_SESSION['favorites'], [$id]));
+            $isFav = false;
+        } else {
+            $_SESSION['favorites'][] = $id;
+            $isFav = true;
+        }
+        echo json_encode(['success' => true, 'is_favorite' => $isFav, 'favorites' => $_SESSION['favorites']]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

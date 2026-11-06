@@ -52,7 +52,12 @@ foreach ($items as $item) {
                                 <div class="item-card">
                                     <div>
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
-                                        <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
+                                            <button type="button" class="fav-toggle-btn" data-id="<?= $item['id'] ?>" style="background: none; border: none; font-size: 1.1rem; cursor: pointer;" title="Toggle Favorite">
+                                                <?= in_array($item['id'], $_SESSION['favorites'] ?? []) ? '⭐' : '☆' ?>
+                                            </button>
+                                        </div>
                                         <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
                                     </div>
                                     <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">
@@ -144,6 +149,17 @@ foreach ($items as $item) {
                 });
             }
         }
+
+        // Toggle favorite
+        $(document).on('click', '.fav-toggle-btn', function() {
+            var $btn = $(this);
+            var itemId = $btn.data('id');
+            $.post('api.php', { action: 'toggle_favorite', item_id: itemId }, function(res) {
+                if (res.success) {
+                    $btn.text(res.is_favorite ? '⭐' : '☆');
+                }
+            }, 'json');
+        });
 
         // 1. Initial Load: Fetch existing cart on page load
         $.get('api.php', { action: 'get_cart' }, function(res) {

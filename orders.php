@@ -32,7 +32,15 @@ $orders = fetchAllOrdersWithItems($pdo);
                     Auto-updating every 3 seconds &bull; Last updated: <span id="last-updated">Just now</span>
                 </p>
             </div>
-            <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh Now</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <label style="font-size: 0.85rem; color: #64748b;">Interval:</label>
+                <select id="interval-select" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.85rem;">
+                    <option value="3000" selected>3s</option>
+                    <option value="5000">5s</option>
+                    <option value="10000">10s</option>
+                </select>
+                <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh</button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -126,8 +134,15 @@ $orders = fetchAllOrdersWithItems($pdo);
             }, 'json');
         }
 
-        // Periodic live queue update every 3 seconds
-        var timer = setInterval(refreshOrders, 3000);
+        // Periodic live queue update with configurable interval
+        var currentInterval = 3000;
+        var timer = setInterval(refreshOrders, currentInterval);
+
+        $('#interval-select').on('change', function() {
+            clearInterval(timer);
+            currentInterval = parseInt($(this).val(), 10);
+            timer = setInterval(refreshOrders, currentInterval);
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

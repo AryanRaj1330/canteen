@@ -32,7 +32,10 @@ $orders = fetchAllOrdersWithItems($pdo);
                     Auto-updating every 3 seconds &bull; Last updated: <span id="last-updated">Just now</span>
                 </p>
             </div>
-            <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh Now</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="order-search" class="form-control" placeholder="Search Order #..." style="width: 180px; padding: 4px 8px; font-size: 0.85rem;">
+                <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh</button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -95,7 +98,8 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // AJAX function to fetch live order list from api.php
         function refreshOrders() {
-            $.get('api.php', { action: 'get_orders' }, function(res) {
+            var searchVal = $('#order-search').val().trim();
+            $.get('api.php', { action: 'get_orders', search: searchVal }, function(res) {
                 if (res.success) {
                     var $tbody = $('#orders-tbody');
                     $tbody.empty();
@@ -128,6 +132,11 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+
+        // Live search filter input
+        $('#order-search').on('input', function() {
+            refreshOrders();
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

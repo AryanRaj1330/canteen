@@ -31,6 +31,9 @@ foreach ($items as $item) {
         </ul>
     </nav>
 
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;"></div>
+
     <div class="container">
         <!-- Order Placement Notification Area -->
         <div id="order-alert" style="display: none;"></div>
@@ -145,6 +148,15 @@ foreach ($items as $item) {
             }
         }
 
+        // Show toast notification
+        function showToast(msg) {
+            var $toast = $('<div style="background: #dc2626; color: #fff; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-top: 8px; font-weight: 500;"></div>').text(msg);
+            $('#toast-container').append($toast);
+            setTimeout(function() {
+                $toast.fadeOut(400, function() { $(this).remove(); });
+            }, 3500);
+        }
+
         // 1. Initial Load: Fetch existing cart on page load
         $.get('api.php', { action: 'get_cart' }, function(res) {
             if (res.success) {
@@ -163,7 +175,7 @@ foreach ($items as $item) {
                 if (res.success) {
                     renderCart(res.cart);
                 } else {
-                    alert(res.message || 'Could not add item');
+                    showToast(res.message || 'Could not add item');
                 }
             }, 'json');
         });

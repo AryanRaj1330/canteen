@@ -50,22 +50,22 @@ switch ($action) {
         if (isset($_SESSION['cart'][$itemId])) {
             $_SESSION['cart'][$itemId]['qty'] += 1;
         } else {
-            // Verify item from database
-            $stmt = $pdo->prepare("SELECT id, name, price FROM items WHERE id = ? AND is_available = 1");
+            // Verify item from database and availability
+            $stmt = $pdo->prepare("SELECT id, name, price, is_available FROM items WHERE id = ?");
             $stmt->execute([$itemId]);
             $item = $stmt->fetch();
 
-            if ($item) {
-                $_SESSION['cart'][$itemId] = [
-                    'id'    => (int)$item['id'],
-                    'name'  => $item['name'],
-                    'price' => (float)$item['price'],
-                    'qty'   => 1
-                ];
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Item is unavailable']);
+            if (!$item || (int)$item['is_available'] !== 1) {
+                echo json_encode(['success' => false, 'message' => 'Sorry! This item is currently unavailable or does not exist.']);
                 exit;
             }
+
+            $_SESSION['cart'][$itemId] = [
+                'id'    => (int)$item['id'],
+                'name'  => $item['name'],
+                'price' => (float)$item['price'],
+                'qty'   => 1
+            ];
         }
 
         echo json_encode(['success' => true, 'cart' => getCartSummary()]);

@@ -80,8 +80,9 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & customer feedback
 $orders = fetchAllOrdersWithItems($pdo);
+$feedbackList = $pdo->query("SELECT * FROM feedback ORDER BY id DESC LIMIT 10")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,6 +117,26 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <!-- Staff-only Customer Feedback Section -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">💬 Customer Feedback Messages</h3>
+            <?php if (empty($feedbackList)): ?>
+                <p style="color: #64748b; font-size: 0.9rem;">No feedback submitted yet.</p>
+            <?php else: ?>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <?php foreach ($feedbackList as $fb): ?>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 6px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">
+                                <strong><?= htmlspecialchars($fb['customer_name']) ?></strong>
+                                <span><?= htmlspecialchars($fb['created_at']) ?></span>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #1e293b;"><?= htmlspecialchars($fb['message']) ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="table-container">

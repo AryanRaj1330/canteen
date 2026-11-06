@@ -175,6 +175,12 @@ switch ($action) {
         }
         break;
 
+    // GET READY ORDERS FOR TV DISPLAY BOARD
+    case 'get_ready':
+        $readyOrders = $pdo->query("SELECT id, order_no, customer_name, created_at FROM orders WHERE status = 'Ready' ORDER BY id DESC LIMIT 16")->fetchAll();
+        echo json_encode(['success' => true, 'orders' => $readyOrders]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

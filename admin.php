@@ -80,8 +80,17 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & Revenue per day
 $orders = fetchAllOrdersWithItems($pdo);
+$driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+$dateGroup = ($driver === 'sqlite') ? "DATE(created_at)" : "DATE(created_at)";
+
+$revPerDay = $pdo->query("
+    SELECT $dateGroup as order_date, COUNT(*) as orders_count, SUM(total_amount) as daily_revenue
+    FROM orders
+    GROUP BY $dateGroup
+    ORDER BY order_date DESC
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,6 +125,27 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <!-- Revenue Per Day Table -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">📅 Revenue Per Day (GROUP BY DATE)</h3>
+            <table class="table" style="font-size: 0.9rem;">
+                <thead><tr><th>Date</th><th>Orders Placed</th><th>Daily Revenue</th></tr></thead>
+                <tbody>
+                    <?php if (empty($revPerDay)): ?>
+                        <tr><td colspan="3" style="text-align:center; color:#888;">No sales recorded yet.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($revPerDay as $r): ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($r['order_date'] ?? date('Y-m-d')) ?></strong></td>
+                                <td><?= $r['orders_count'] ?> order(s)</td>
+                                <td style="font-weight: 600; color: #15803d;">₹<?= number_format($r['daily_revenue'], 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="table-container">

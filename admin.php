@@ -161,6 +161,11 @@ $orders = fetchAllOrdersWithItems($pdo);
                 </tbody>
             </table>
         </div>
+
+        <!-- Admin Footer showing DB Engine -->
+        <div style="text-align: center; margin-top: 24px; padding: 16px; font-size: 0.85rem; color: #64748b; border-top: 1px solid #e2e8f0;">
+            Connected Database Engine: <strong id="db-engine-badge" style="color: #0284c7;">Checking...</strong>
+        </div>
     </div>
 
     <!-- jQuery CDN -->
@@ -168,6 +173,13 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Ping API to display active DB Engine in admin footer
+        $.get('api.php', { action: 'ping' }, function(res) {
+            if (res.success) {
+                $('#db-engine-badge').text(res.engine);
+            }
+        }, 'json');
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

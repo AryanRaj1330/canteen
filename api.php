@@ -175,6 +175,12 @@ switch ($action) {
         }
         break;
 
+    // PING API FOR ACTIVE DATABASE ENGINE
+    case 'ping':
+        $engine = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        echo json_encode(['success' => true, 'engine' => strtoupper($engine)]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

@@ -129,6 +129,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Total</th>
                         <th>Time</th>
                         <th>Update Status</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,6 +156,9 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         <span class="status-feedback" id="feedback-<?= $order['id'] ?>" style="display: none;">Saved ✓</span>
                                     </div>
                                 </td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary view-detail-btn" data-id="<?= $order['id'] ?>">View</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -168,6 +172,22 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // View Order Details popup
+        $('.view-detail-btn').on('click', function() {
+            var orderId = $(this).data('id');
+            $.get('api.php', { action: 'get_order', order_id: orderId }, function(res) {
+                if (res.success) {
+                    var o = res.order;
+                    var itemsList = res.items.map(function(it) {
+                        return '• ' + it.item_name + ' (Qty: ' + it.quantity + ') - ₹' + (it.price * it.quantity).toFixed(2);
+                    }).join('\n');
+                    alert('Order #' + o.order_no + '\nCustomer: ' + o.customer_name + ' (' + o.phone + ')\nTotal: ₹' + parseFloat(o.total_amount).toFixed(2) + '\nStatus: ' + o.status + '\n\nItems:\n' + itemsList);
+                } else {
+                    alert(res.message);
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

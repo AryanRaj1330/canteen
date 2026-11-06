@@ -175,6 +175,23 @@ switch ($action) {
         }
         break;
 
+    // GET SINGLE ORDER DETAIL AS JSON
+    case 'get_order':
+        $orderId = (int)($_GET['order_id'] ?? 0);
+        $stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        $ord = $stmt->fetch();
+
+        if ($ord) {
+            $itemStmt = $pdo->prepare("SELECT * FROM order_items WHERE order_id = ?");
+            $itemStmt->execute([$orderId]);
+            $ordItems = $itemStmt->fetchAll();
+            echo json_encode(['success' => true, 'order' => $ord, 'items' => $ordItems]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Order not found']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
-    price DECIMAL(8, 2) NOT NULL,
+    price DECIMAL(8, 2) NOT NULL CHECK (price > 0),
     is_available TINYINT(1) DEFAULT 1
 );
 

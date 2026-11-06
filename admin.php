@@ -80,6 +80,23 @@ if (!$isLoggedIn) {
     exit;
 }
 
+// Handle Admin Add Menu Item with CHECK (price > 0) constraint error handling
+$itemMsg = '';
+$itemErr = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_menu_item') {
+    $name = trim($_POST['name'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+    $price = (float)($_POST['price'] ?? 0);
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO items (name, category, price, is_available) VALUES (?, ?, ?, 1)");
+        $stmt->execute([$name, $category, $price]);
+        $itemMsg = "Item '{$name}' successfully added!";
+    } catch (PDOException $e) {
+        $itemErr = "Validation Error: Price must be strictly greater than 0. Database CHECK (price > 0) rejected insertion.";
+    }
+}
+
 // 4. Fetch all orders for authenticated staff view
 $orders = fetchAllOrdersWithItems($pdo);
 ?>
@@ -116,6 +133,37 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <?php if (!empty($itemMsg)): ?>
+            <div class="alert alert-success"><span><?= htmlspecialchars($itemMsg) ?></span></div>
+        <?php endif; ?>
+        <?php if (!empty($itemErr)): ?>
+            <div class="alert alert-danger"><span><?= htmlspecialchars($itemErr) ?></span></div>
+        <?php endif; ?>
+
+        <!-- Add Item Card to test CHECK constraint -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">+ Add Menu Item (Validates CHECK (price > 0))</h3>
+            <form method="POST" action="admin.php" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                <input type="hidden" name="action" value="add_menu_item">
+                <div style="flex: 2; min-width: 160px;">
+                    <label style="font-size: 0.85rem; font-weight: 600;">Item Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                    <label style="font-size: 0.85rem; font-weight: 600;">Category</label>
+                    <select name="category" class="form-control">
+                        <option value="Food">Food</option>
+                        <option value="Beverages">Beverages</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 100px;">
+                    <label style="font-size: 0.85rem; font-weight: 600;">Price (Try -5 to test error)</label>
+                    <input type="number" step="0.50" name="price" class="form-control" placeholder="50.00" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Item</button>
+            </form>
         </div>
 
         <div class="table-container">

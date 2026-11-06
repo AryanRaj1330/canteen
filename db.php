@@ -35,7 +35,7 @@ try {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             category TEXT NOT NULL,
-            price REAL NOT NULL,
+            price REAL NOT NULL CHECK (price > 0),
             is_available INTEGER DEFAULT 1
         );
 

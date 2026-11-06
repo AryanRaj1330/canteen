@@ -22,12 +22,38 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 } catch (PDOException $e) {
-    // 2. Fallback: If MySQL is not running yet, use zero-config SQLite so localhost works immediately
-    $sqliteFile = __DIR__ . '/canteen_db.sqlite';
-    $pdo = new PDO("sqlite:" . $sqliteFile, null, null, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
+    // 2. Fallback: If MySQL is not running yet, try SQLite
+    try {
+        $sqliteFile = __DIR__ . '/canteen_db.sqlite';
+        $pdo = new PDO("sqlite:" . $sqliteFile, null, null, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
+    } catch (PDOException $e2) {
+        // Friendly error page when both MySQL and SQLite fail
+        http_response_code(503);
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Service Unavailable - Campus Canteen</title>
+            <link rel="stylesheet" href="styles.css">
+        </head>
+        <body style="background: #f8fafc; padding: 40px 20px;">
+            <div style="max-width: 500px; margin: 60px auto; background: #fff; border: 1px solid #fecaca; border-radius: 8px; padding: 30px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🔌</div>
+                <h2 style="color: #b91c1c; margin-bottom: 10px;">Service Temporarily Unavailable</h2>
+                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">
+                    We are unable to connect to the canteen database at this time. Both MySQL and SQLite storage connections failed.
+                </p>
+                <a href="index.php" class="btn btn-primary" style="display: inline-block;">↻ Try Again</a>
+            </div>
+        </body>
+        </html>
+        <?php
+        exit;
+    }
 
     // Create tables if they do not exist
     $pdo->exec("

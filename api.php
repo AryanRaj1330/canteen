@@ -175,6 +175,27 @@ switch ($action) {
         }
         break;
 
+    // EDIT CUSTOMER NAME OR PHONE (Staff Admin)
+    case 'edit_customer':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $name = trim($_POST['customer_name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        if (empty($name) || !preg_match('/^[0-9]{10}$/', $phone)) {
+            echo json_encode(['success' => false, 'message' => 'Name required and phone must be exactly 10 digits.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE orders SET customer_name = ?, phone = ? WHERE id = ?");
+        $stmt->execute([$name, $phone, $orderId]);
+        echo json_encode(['success' => true, 'message' => 'Customer details updated!']);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

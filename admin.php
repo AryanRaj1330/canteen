@@ -125,6 +125,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Order #</th>
                         <th>Customer</th>
                         <th>Phone</th>
+                        <th>Edit</th>
                         <th>Items Ordered</th>
                         <th>Total</th>
                         <th>Time</th>
@@ -140,8 +141,11 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
-                                <td><?= htmlspecialchars($order['customer_name']) ?></td>
-                                <td><?= htmlspecialchars($order['phone']) ?></td>
+                                <td id="name-<?= $order['id'] ?>"><?= htmlspecialchars($order['customer_name']) ?></td>
+                                <td id="phone-<?= $order['id'] ?>"><?= htmlspecialchars($order['phone']) ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary edit-customer-btn" data-id="<?= $order['id'] ?>">✏️ Edit</button>
+                                </td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
@@ -168,6 +172,33 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Edit customer name / phone
+        $('.edit-customer-btn').on('click', function() {
+            var orderId = $(this).data('id');
+            var currName = $('#name-' + orderId).text().trim();
+            var currPhone = $('#phone-' + orderId).text().trim();
+
+            var newName = prompt('Edit Customer Name:', currName);
+            if (newName === null) return;
+            var newPhone = prompt('Edit Customer Phone (10 digits):', currPhone);
+            if (newPhone === null) return;
+
+            $.post('api.php', {
+                action: 'edit_customer',
+                order_id: orderId,
+                customer_name: newName,
+                phone: newPhone
+            }, function(res) {
+                if (res.success) {
+                    $('#name-' + orderId).text(newName);
+                    $('#phone-' + orderId).text(newPhone);
+                    alert(res.message);
+                } else {
+                    alert(res.message);
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

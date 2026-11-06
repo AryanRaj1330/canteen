@@ -106,6 +106,7 @@ switch ($action) {
     case 'checkout':
         $name = trim($_POST['customer_name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $isExpress = !empty($_POST['is_express']) ? 1 : 0;
 
         if (empty($_SESSION['cart'])) {
             echo json_encode(['success' => false, 'message' => 'Your cart is empty. Please add items.']);
@@ -128,9 +129,9 @@ switch ($action) {
 
         $pdo->beginTransaction();
         try {
-            // Insert into orders table
-            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, 'Received')");
-            $stmt->execute([$orderNo, $name, $phone, $total]);
+            // Insert into orders table with is_express flag
+            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, is_express, status) VALUES (?, ?, ?, ?, ?, 'Received')");
+            $stmt->execute([$orderNo, $name, $phone, $total, $isExpress]);
             $orderId = $pdo->lastInsertId();
 
             // Insert each item into order_items table

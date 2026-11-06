@@ -46,6 +46,7 @@ try {
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
             status TEXT DEFAULT 'Received',
+            is_express INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -76,7 +77,7 @@ try {
 
 // Helper function to fetch all orders with their ordered items (works universally)
 function fetchAllOrdersWithItems($pdo) {
-    $orders = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();
+    $orders = $pdo->query("SELECT * FROM orders ORDER BY is_express DESC, id DESC")->fetchAll();
     $items = $pdo->query("SELECT * FROM order_items")->fetchAll();
 
     $itemsMap = [];

@@ -55,7 +55,12 @@ $orders = fetchAllOrdersWithItems($pdo);
                     <?php else: ?>
                         <?php foreach ($orders as $order): ?>
                             <tr>
-                                <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($order['order_no']) ?></strong>
+                                    <?php if (!empty($order['is_express'])): ?>
+                                        <span class="badge" style="background:#fef08a;color:#854d0e;margin-left:4px;">⚡ Express</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
@@ -107,7 +112,10 @@ $orders = fetchAllOrdersWithItems($pdo);
                             var badgeClass = getBadgeClass(o.status);
                             var row = `
                                 <tr>
-                                    <td><strong>${o.order_no}</strong></td>
+                                    <td>
+                                        <strong>${o.order_no}</strong>
+                                        ${o.is_express == 1 ? '<span class="badge" style="background:#fef08a;color:#854d0e;margin-left:4px;">⚡ Express</span>' : ''}
+                                    </td>
                                     <td>${o.customer_name}</td>
                                     <td>${o.items_summary || 'No items'}</td>
                                     <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>

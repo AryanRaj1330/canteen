@@ -95,6 +95,13 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem;">
+                            <input type="checkbox" name="is_express" value="1" style="width: 18px; height: 18px;">
+                            <span>⚡ Express Order (Priority Preparation)</span>
+                        </label>
+                    </div>
+
                     <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
                         Place Pre-Order
                     </button>

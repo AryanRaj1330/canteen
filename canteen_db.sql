@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS items (
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     price DECIMAL(8, 2) NOT NULL,
+    description VARCHAR(255),
     is_available TINYINT(1) DEFAULT 1
 );
 
@@ -35,10 +36,10 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 -- Seed Data: Sample Canteen Menu Items (Food & Beverages)
-INSERT INTO items (name, category, price, is_available) VALUES
-('Veg Burger', 'Food', 50.00, 1),
-('Chicken Sandwich', 'Food', 80.00, 1),
-('Hot Samosa (2 pcs)', 'Food', 25.00, 1),
-('Masala Dosa', 'Food', 60.00, 1),
-('Cold Coffee', 'Beverages', 40.00, 1),
-('Lemon Iced Tea', 'Beverages', 30.00, 1);
+INSERT INTO items (name, category, price, description, is_available) VALUES
+('Veg Burger', 'Food', 50.00, 'Crispy spiced potato patty with freshly chopped lettuce & herb sauce', 1),
+('Chicken Sandwich', 'Food', 80.00, 'Tender chicken fillet served with creamy mint mayonnaise in toasted bread', 1),
+('Hot Samosa (2 pcs)', 'Food', 25.00, 'Traditional golden-fried pastry stuffed with spiced potatoes and peas', 1),
+('Masala Dosa', 'Food', 60.00, 'Crispy golden crepe stuffed with mildly spiced potato masala, served with chutney', 1),
+('Cold Coffee', 'Beverages', 40.00, 'Rich chilled espresso blended with fresh dairy milk and cocoa', 1),
+('Lemon Iced Tea', 'Beverages', 30.00, 'Freshly brewed black tea infused with natural lemon juice and crushed ice', 1);

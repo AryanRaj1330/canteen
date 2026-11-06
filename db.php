@@ -36,6 +36,7 @@ try {
             name TEXT NOT NULL,
             category TEXT NOT NULL,
             price REAL NOT NULL,
+            description TEXT,
             is_available INTEGER DEFAULT 1
         );
 
@@ -63,13 +64,13 @@ try {
     $count = $pdo->query("SELECT COUNT(*) FROM items")->fetchColumn();
     if ($count == 0) {
         $pdo->exec("
-            INSERT INTO items (name, category, price, is_available) VALUES
-            ('Veg Burger', 'Food', 50.00, 1),
-            ('Chicken Sandwich', 'Food', 80.00, 1),
-            ('Hot Samosa (2 pcs)', 'Food', 25.00, 1),
-            ('Masala Dosa', 'Food', 60.00, 1),
-            ('Cold Coffee', 'Beverages', 40.00, 1),
-            ('Lemon Iced Tea', 'Beverages', 30.00, 1);
+            INSERT INTO items (name, category, price, description, is_available) VALUES
+            ('Veg Burger', 'Food', 50.00, 'Crispy spiced potato patty with freshly chopped lettuce & herb sauce', 1),
+            ('Chicken Sandwich', 'Food', 80.00, 'Tender chicken fillet served with creamy mint mayonnaise in toasted bread', 1),
+            ('Hot Samosa (2 pcs)', 'Food', 25.00, 'Traditional golden-fried pastry stuffed with spiced potatoes and peas', 1),
+            ('Masala Dosa', 'Food', 60.00, 'Crispy golden crepe stuffed with mildly spiced potato masala, served with chutney', 1),
+            ('Cold Coffee', 'Beverages', 40.00, 'Rich chilled espresso blended with fresh dairy milk and cocoa', 1),
+            ('Lemon Iced Tea', 'Beverages', 30.00, 'Freshly brewed black tea infused with natural lemon juice and crushed ice', 1);
         ");
     }
 }

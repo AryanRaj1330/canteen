@@ -53,6 +53,9 @@ foreach ($items as $item) {
                                     <div>
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
                                         <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
+                                        <?php if (!empty($item['description'])): ?>
+                                            <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 6px;"><?= htmlspecialchars($item['description']) ?></p>
+                                        <?php endif; ?>
                                         <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
                                     </div>
                                     <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">

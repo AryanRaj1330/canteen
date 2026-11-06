@@ -36,7 +36,8 @@ try {
             name TEXT NOT NULL,
             category TEXT NOT NULL,
             price REAL NOT NULL,
-            is_available INTEGER DEFAULT 1
+            is_available INTEGER DEFAULT 1,
+            image_url TEXT DEFAULT NULL
         );
 
         CREATE TABLE IF NOT EXISTS orders (

@@ -51,6 +51,7 @@ foreach ($items as $item) {
                             <?php foreach ($catItems as $item): ?>
                                 <div class="item-card">
                                     <div>
+                                        <img src="<?= !empty($item['image_url']) ? htmlspecialchars($item['image_url']) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop' ?>" alt="<?= htmlspecialchars($item['name']) ?>" style="width: 100%; height: 110px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
                                         <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
                                         <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>

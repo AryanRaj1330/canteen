@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS items (
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     price DECIMAL(8, 2) NOT NULL,
-    is_available TINYINT(1) DEFAULT 1
+    is_available TINYINT(1) DEFAULT 1,
+    image_url VARCHAR(255) DEFAULT NULL
 );
 
 -- 2. Table: orders

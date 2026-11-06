@@ -11,7 +11,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 // 2. Handle Login submission
 $loginError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
-    if (trim($_POST['staff_pin']) === STAFF_PIN) {
+    if (password_verify(trim($_POST['staff_pin']), STAFF_PIN_HASH)) {
         $_SESSION['staff_logged_in'] = true;
         header('Location: admin.php');
         exit;

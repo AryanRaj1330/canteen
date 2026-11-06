@@ -4,9 +4,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Staff Dashboard Security PIN
-if (!defined('STAFF_PIN')) {
-    define('STAFF_PIN', '1234');
+// Staff Dashboard Security PIN (Stored as Bcrypt Hash)
+if (!defined('STAFF_PIN_HASH')) {
+    define('STAFF_PIN_HASH', password_hash('1234', PASSWORD_DEFAULT));
 }
 
 // Database configuration (Default XAMPP / MariaDB credentials)

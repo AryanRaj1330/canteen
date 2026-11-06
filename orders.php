@@ -65,6 +65,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         $badgeClass = 'badge-received';
                                         if ($order['status'] === 'Preparing') $badgeClass = 'badge-preparing';
                                         if ($order['status'] === 'Ready') $badgeClass = 'badge-ready';
+                                        if ($order['status'] === 'Completed') $badgeClass = 'badge-completed';
                                     ?>
                                     <span class="badge <?= $badgeClass ?>">
                                         <?= htmlspecialchars($order['status']) ?>
@@ -89,6 +90,7 @@ $orders = fetchAllOrdersWithItems($pdo);
             switch (status) {
                 case 'Preparing': return 'badge-preparing';
                 case 'Ready': return 'badge-ready';
+                case 'Completed': return 'badge-completed';
                 default: return 'badge-received';
             }
         }

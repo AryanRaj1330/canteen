@@ -164,7 +164,7 @@ switch ($action) {
 
         $orderId = (int)($_POST['order_id'] ?? 0);
         $status = $_POST['status'] ?? '';
-        $allowedStatuses = ['Received', 'Preparing', 'Ready'];
+        $allowedStatuses = ['Received', 'Preparing', 'Ready', 'Completed'];
 
         if ($orderId > 0 && in_array($status, $allowedStatuses, true)) {
             $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");

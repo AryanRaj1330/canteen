@@ -35,6 +35,12 @@ foreach ($items as $item) {
         <!-- Order Placement Notification Area -->
         <div id="order-alert" style="display: none;"></div>
 
+        <?php if (!isCanteenOpen()): ?>
+            <div class="alert alert-danger" style="font-size: 1.1rem; text-align: center; margin-bottom: 24px;">
+                ⛔ <strong>Canteen is currently CLOSED.</strong> Online pre-orders are accepted only from 9:00 AM to 5:00 PM.
+            </div>
+        <?php endif; ?>
+
         <div class="main-layout">
             <!-- Left Column: Menu Items -->
             <div class="menu-section">
@@ -95,8 +101,8 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
-                    <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
-                        Place Pre-Order
+                    <button type="submit" id="place-order-btn" class="btn btn-success" <?= !isCanteenOpen() ? 'disabled title="Canteen Closed"' : 'disabled' ?>>
+                        <?= !isCanteenOpen() ? 'Canteen Closed' : 'Place Pre-Order' ?>
                     </button>
                 </form>
             </div>

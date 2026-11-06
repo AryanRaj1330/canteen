@@ -74,6 +74,15 @@ try {
     }
 }
 
+// Canteen operating hours config (e.g. 9 AM to 5 PM)
+define('CANTEEN_OPEN_HOUR', 9);
+define('CANTEEN_CLOSE_HOUR', 17);
+
+function isCanteenOpen() {
+    $hour = (int)date('G');
+    return ($hour >= CANTEEN_OPEN_HOUR && $hour < CANTEEN_CLOSE_HOUR);
+}
+
 // Helper function to fetch all orders with their ordered items (works universally)
 function fetchAllOrdersWithItems($pdo) {
     $orders = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();

@@ -104,6 +104,12 @@ switch ($action) {
 
     // 5. CHECKOUT (PLACE ORDER)
     case 'checkout':
+        // Block checkout outside canteen operating hours
+        if (!isCanteenOpen()) {
+            echo json_encode(['success' => false, 'message' => 'Canteen is currently CLOSED. Ordering is available strictly between 9:00 AM and 5:00 PM.']);
+            exit;
+        }
+
         $name = trim($_POST['customer_name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
 

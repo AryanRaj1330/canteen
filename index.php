@@ -224,7 +224,12 @@ foreach ($items as $item) {
                     $('html, body').animate({ scrollTop: 0 }, 'fast');
                 } else {
                     $btn.prop('disabled', false);
-                    alert(res.message || 'Checkout failed');
+                    $('#order-alert').html(`
+                        <div class="alert alert-danger">
+                            <div><strong>Notice:</strong> ${res.message || 'Checkout failed'}</div>
+                        </div>
+                    `).show();
+                    $('html, body').animate({ scrollTop: 0 }, 'fast');
                 }
             }, 'json').fail(function() {
                 $btn.prop('disabled', false).text('Place Pre-Order');

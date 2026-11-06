@@ -123,6 +123,12 @@ switch ($action) {
             $total += $item['price'] * $item['qty'];
         }
 
+        // Validate minimum order amount of Rs. 30
+        if ($total < 30.0) {
+            echo json_encode(['success' => false, 'message' => 'Minimum order amount is ₹30.00. Your current total is ₹' . number_format($total, 2)]);
+            exit;
+        }
+
         // Generate unique order number (e.g. ORD-7429)
         $orderNo = 'ORD-' . strtoupper(substr(uniqid(), -4));
 

@@ -32,7 +32,10 @@ $orders = fetchAllOrdersWithItems($pdo);
                     Auto-updating every 3 seconds &bull; Last updated: <span id="last-updated">Just now</span>
                 </p>
             </div>
-            <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh Now</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="pause-refresh-btn" class="btn btn-secondary btn-sm">⏸ Pause</button>
+                <button id="manual-refresh-btn" class="btn btn-primary btn-sm">↻ Refresh</button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -128,6 +131,21 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+        var isPaused = false;
+
+        $('#pause-refresh-btn').on('click', function() {
+            if (!isPaused) {
+                clearInterval(timer);
+                isPaused = true;
+                $(this).text('▶ Resume');
+                $('#last-updated').text('Paused');
+            } else {
+                timer = setInterval(refreshOrders, 3000);
+                isPaused = false;
+                $(this).text('⏸ Pause');
+                refreshOrders();
+            }
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

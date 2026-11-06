@@ -46,7 +46,8 @@ try {
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
             status TEXT DEFAULT 'Received',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT NULL
         );
 
         CREATE TABLE IF NOT EXISTS order_items (

@@ -127,7 +127,8 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Phone</th>
                         <th>Items Ordered</th>
                         <th>Total</th>
-                        <th>Time</th>
+                        <th>Created Time</th>
+                        <th>Status Updated At</th>
                         <th>Update Status</th>
                     </tr>
                 </thead>
@@ -145,6 +146,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
+                                <td style="font-size: 0.85rem; color: #64748b;"><?= !empty($order['updated_at']) ? date('h:i:s A', strtotime($order['updated_at'])) : '<span style="color:#94a3b8;">Not updated yet</span>' ?></td>
                                 <td>
                                     <div style="display: flex; align-items: center;">
                                         <select class="form-control status-select" data-id="<?= $order['id'] ?>" style="width: auto; padding: 4px 8px;">

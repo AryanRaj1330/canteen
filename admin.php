@@ -1,10 +1,36 @@
 <?php
 require_once 'db.php';
 
-// 1. Handle Logout request
+// 1. Handle Logout and CSV Export requests
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     unset($_SESSION['staff_logged_in']);
     header('Location: admin.php');
+    exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'export_csv') {
+    if (empty($_SESSION['staff_logged_in'])) {
+        header('Location: admin.php');
+        exit;
+    }
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="canteen_orders_' . date('Y-m-d') . '.csv"');
+    $out = fopen('php://output', 'w');
+    fputcsv($out, ['Order #', 'Customer Name', 'Phone', 'Items Ordered', 'Total Amount (INR)', 'Order Time', 'Status']);
+
+    $allOrders = fetchAllOrdersWithItems($pdo);
+    foreach ($allOrders as $o) {
+        fputcsv($out, [
+            $o['order_no'],
+            $o['customer_name'],
+            $o['phone'],
+            $o['items_summary'],
+            $o['total_amount'],
+            $o['order_time'],
+            $o['status']
+        ]);
+    }
+    fclose($out);
     exit;
 }
 
@@ -113,6 +139,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                 </p>
             </div>
             <div style="display: flex; gap: 8px;">
+                <a href="admin.php?action=export_csv" class="btn btn-secondary btn-sm">📥 Export CSV</a>
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>

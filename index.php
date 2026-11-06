@@ -53,7 +53,16 @@ foreach ($items as $item) {
                                     <div>
                                         <span class="item-badge"><?= htmlspecialchars($item['category']) ?></span>
                                         <div class="item-name"><?= htmlspecialchars($item['name']) ?></div>
-                                        <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
+                                        <?php if (!empty($item['discount_percent'])): ?>
+                                            <?php $discPrice = round($item['price'] * (1 - $item['discount_percent']/100), 2); ?>
+                                            <div class="item-price">
+                                                <del style="color: #94a3b8; font-size: 0.9rem; margin-right: 4px;">₹<?= number_format($item['price'], 2) ?></del>
+                                                <span style="color: #16a34a; font-weight: bold;">₹<?= number_format($discPrice, 2) ?></span>
+                                                <span class="badge" style="background: #dcfce7; color: #16a34a; font-size: 0.75rem; margin-left: 4px;">-<?= $item['discount_percent'] ?>%</span>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
+                                        <?php endif; ?>
                                     </div>
                                     <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">
                                         + Add to Cart

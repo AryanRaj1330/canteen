@@ -50,16 +50,19 @@ switch ($action) {
         if (isset($_SESSION['cart'][$itemId])) {
             $_SESSION['cart'][$itemId]['qty'] += 1;
         } else {
-            // Verify item from database
-            $stmt = $pdo->prepare("SELECT id, name, price FROM items WHERE id = ? AND is_available = 1");
+            // Verify item from database with discount percent
+            $stmt = $pdo->prepare("SELECT id, name, price, discount_percent FROM items WHERE id = ? AND is_available = 1");
             $stmt->execute([$itemId]);
             $item = $stmt->fetch();
 
             if ($item) {
+                $origPrice = (float)$item['price'];
+                $discPct = (int)($item['discount_percent'] ?? 0);
+                $finalPrice = $discPct > 0 ? round($origPrice * (1 - $discPct / 100), 2) : $origPrice;
                 $_SESSION['cart'][$itemId] = [
                     'id'    => (int)$item['id'],
                     'name'  => $item['name'],
-                    'price' => (float)$item['price'],
+                    'price' => $finalPrice,
                     'qty'   => 1
                 ];
             } else {

@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS items (
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     price DECIMAL(8, 2) NOT NULL,
-    is_available TINYINT(1) DEFAULT 1
+    is_available TINYINT(1) DEFAULT 1,
+    discount_percent INT DEFAULT 0
 );
 
 -- 2. Table: orders
@@ -35,10 +36,10 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 -- Seed Data: Sample Canteen Menu Items (Food & Beverages)
-INSERT INTO items (name, category, price, is_available) VALUES
-('Veg Burger', 'Food', 50.00, 1),
-('Chicken Sandwich', 'Food', 80.00, 1),
-('Hot Samosa (2 pcs)', 'Food', 25.00, 1),
-('Masala Dosa', 'Food', 60.00, 1),
-('Cold Coffee', 'Beverages', 40.00, 1),
-('Lemon Iced Tea', 'Beverages', 30.00, 1);
+INSERT INTO items (name, category, price, is_available, discount_percent) VALUES
+('Veg Burger', 'Food', 50.00, 1, 0),
+('Chicken Sandwich', 'Food', 80.00, 1, 20),
+('Hot Samosa (2 pcs)', 'Food', 25.00, 1, 0),
+('Masala Dosa', 'Food', 60.00, 1, 0),
+('Cold Coffee', 'Beverages', 40.00, 1, 0),
+('Lemon Iced Tea', 'Beverages', 30.00, 1, 0);

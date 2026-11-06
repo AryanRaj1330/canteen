@@ -31,6 +31,15 @@ try {
 
     // Create tables if they do not exist
     $pdo->exec("
+        CREATE TABLE IF NOT EXISTS staff (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
+        );
+
+        INSERT OR IGNORE INTO staff (username, password_hash) VALUES 
+        ('admin', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lR5.J1iK7hW5E2t3e6mF7zR8m5xGm');
+
         CREATE TABLE IF NOT EXISTS items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,

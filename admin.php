@@ -8,15 +8,23 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
-// 2. Handle Login submission
+// 2. Handle Login submission using username and password
 $loginError = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
-    if (trim($_POST['staff_pin']) === STAFF_PIN) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
+    $uname = trim($_POST['username'] ?? '');
+    $pwd = trim($_POST['password'] ?? '');
+
+    $stmt = $pdo->prepare("SELECT * FROM staff WHERE username = ?");
+    $stmt->execute([$uname]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($pwd, $user['password_hash'])) {
         $_SESSION['staff_logged_in'] = true;
+        $_SESSION['staff_user'] = $user['username'];
         header('Location: admin.php');
         exit;
     } else {
-        $loginError = 'Incorrect PIN. Please try again.';
+        $loginError = 'Invalid username or password.';
     }
 }
 
@@ -60,16 +68,20 @@ if (!$isLoggedIn) {
             <?php endif; ?>
 
             <form method="POST" action="admin.php">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label for="staff_pin">Security PIN</label>
-                    <input type="password" id="staff_pin" name="staff_pin" class="form-control pin-input" maxlength="10" placeholder="••••" required autofocus autocomplete="off">
+                <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="e.g. admin" required autofocus>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem;">
-                    Unlock Dashboard
+                    Sign In
                 </button>
             </form>
             <p style="margin-top: 16px; font-size: 0.8rem; color: #888;">
-                Default PIN: <code>1234</code> (configurable in <code>db.php</code>)
+                Default credentials: <code>admin / admin</code>
             </p>
         </div>
     </div>

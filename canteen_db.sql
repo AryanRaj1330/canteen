@@ -4,6 +4,12 @@
 CREATE DATABASE IF NOT EXISTS canteen_db;
 USE canteen_db;
 
+CREATE TABLE IF NOT EXISTS customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL UNIQUE
+);
+
 -- 1. Table: items
 CREATE TABLE IF NOT EXISTS items (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -17,6 +23,7 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_no VARCHAR(20) NOT NULL UNIQUE,
+    customer_id INT,
     customer_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     total_amount DECIMAL(8, 2) NOT NULL,

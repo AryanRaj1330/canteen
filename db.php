@@ -31,6 +31,12 @@ try {
 
     // Create tables if they do not exist
     $pdo->exec("
+        CREATE TABLE IF NOT EXISTS customers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL UNIQUE
+        );
+
         CREATE TABLE IF NOT EXISTS items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -42,6 +48,7 @@ try {
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_no TEXT NOT NULL UNIQUE,
+            customer_id INTEGER,
             customer_name TEXT NOT NULL,
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,

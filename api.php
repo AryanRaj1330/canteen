@@ -128,9 +128,24 @@ switch ($action) {
 
         $pdo->beginTransaction();
         try {
-            // Insert into orders table
-            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, 'Received')");
-            $stmt->execute([$orderNo, $name, $phone, $total]);
+            // Re-use or insert into customers table
+            $custStmt = $pdo->prepare("SELECT id FROM customers WHERE phone = ?");
+            $custStmt->execute([$phone]);
+            $customerId = $custStmt->fetchColumn();
+
+            if (!$customerId) {
+                $insCust = $pdo->prepare("INSERT INTO customers (name, phone) VALUES (?, ?)");
+                $insCust->execute([$name, $phone]);
+                $customerId = $pdo->lastInsertId();
+            } else {
+                // Update name if changed
+                $upCust = $pdo->prepare("UPDATE customers SET name = ? WHERE id = ?");
+                $upCust->execute([$name, $customerId]);
+            }
+
+            // Insert into orders table with customer_id
+            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_id, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, ?, 'Received')");
+            $stmt->execute([$orderNo, $customerId, $name, $phone, $total]);
             $orderId = $pdo->lastInsertId();
 
             // Insert each item into order_items table

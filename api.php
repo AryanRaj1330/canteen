@@ -117,6 +117,12 @@ switch ($action) {
             exit;
         }
 
+        // Server-side phone validation: exactly 10 digits
+        if (!preg_match('/^[0-9]{10}$/', $phone)) {
+            echo json_encode(['success' => false, 'field' => 'phone', 'message' => 'Phone number must be exactly 10 digits.']);
+            exit;
+        }
+
         // Calculate final total
         $total = 0;
         foreach ($_SESSION['cart'] as $item) {

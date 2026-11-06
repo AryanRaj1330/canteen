@@ -387,6 +387,12 @@ body {
     border: 1px solid #86efac;
 }
 
+.badge-cancelled {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
 /* Alert Notification Banner */
 .alert {
     padding: 12px 16px;

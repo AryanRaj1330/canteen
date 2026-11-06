@@ -151,6 +151,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                             <option value="Received" <?= $order['status'] === 'Received' ? 'selected' : '' ?>>Received</option>
                                             <option value="Preparing" <?= $order['status'] === 'Preparing' ? 'selected' : '' ?>>Preparing</option>
                                             <option value="Ready" <?= $order['status'] === 'Ready' ? 'selected' : '' ?>>Ready</option>
+                                            <option value="Cancelled" <?= $order['status'] === 'Cancelled' ? 'selected' : '' ?>>Cancelled</option>
                                         </select>
                                         <span class="status-feedback" id="feedback-<?= $order['id'] ?>" style="display: none;">Saved ✓</span>
                                     </div>

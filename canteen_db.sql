@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     total_amount DECIMAL(8, 2) NOT NULL,
-    status ENUM('Received', 'Preparing', 'Ready') DEFAULT 'Received',
+    status ENUM('Received', 'Preparing', 'Ready', 'Cancelled') DEFAULT 'Received',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

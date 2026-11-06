@@ -80,8 +80,9 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & repeat customer counts (> 3 orders)
 $orders = fetchAllOrdersWithItems($pdo);
+$phoneOrderCounts = $pdo->query("SELECT phone, COUNT(*) as cnt FROM orders GROUP BY phone")->fetchAll(PDO::FETCH_KEY_PAIR);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -140,7 +141,14 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
-                                <td><?= htmlspecialchars($order['customer_name']) ?></td>
+                                <td>
+                                    <?= htmlspecialchars($order['customer_name']) ?>
+                                    <?php if (($phoneOrderCounts[$order['phone']] ?? 0) > 3): ?>
+                                        <span class="badge" style="background:#fef08a;color:#854d0e;border:1px solid #fde047;font-size:0.7rem;margin-left:4px;">
+                                            ⭐ Repeat Customer (<?= $phoneOrderCounts[$order['phone']] ?>)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>

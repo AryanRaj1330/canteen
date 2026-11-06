@@ -80,8 +80,29 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
-$orders = fetchAllOrdersWithItems($pdo);
+// 4. Pagination (10 orders per page) using LIMIT and OFFSET in PHP
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+
+$totalOrdersCount = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+$totalPages = max(1, ceil($totalOrdersCount / $limit));
+
+$stmt = $pdo->prepare("SELECT * FROM orders ORDER BY id DESC LIMIT :limit OFFSET :offset");
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$orders = $stmt->fetchAll();
+
+$items = $pdo->query("SELECT * FROM order_items")->fetchAll();
+$itemsMap = [];
+foreach ($items as $item) {
+    $itemsMap[$item['order_id']][] = $item['item_name'] . ' (x' . $item['quantity'] . ')';
+}
+foreach ($orders as &$order) {
+    $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
+    $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,6 +181,25 @@ $orders = fetchAllOrdersWithItems($pdo);
                     <?php endif; ?>
                 </tbody>
             </table>
+            <!-- Pagination Navigation -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <div style="font-size: 0.85rem; color: #64748b;">
+                    Showing Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong> (Total: <?= $totalOrdersCount ?> orders)
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <?php if ($page > 1): ?>
+                        <a href="admin.php?page=<?= $page - 1 ?>" class="btn btn-secondary btn-sm">&laquo; Previous</a>
+                    <?php else: ?>
+                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5;">&laquo; Previous</button>
+                    <?php endif; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="admin.php?page=<?= $page + 1 ?>" class="btn btn-secondary btn-sm">Next &raquo;</a>
+                    <?php else: ?>
+                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5;">Next &raquo;</button>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -8,15 +8,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
-// 2. Handle Login submission
+// 2. Handle Login submission with 3-attempt lockout for 1 minute
 $loginError = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
+$isLocked = false;
+$secondsRemaining = 0;
+
+if (!empty($_SESSION['lockout_until'])) {
+    if (time() < $_SESSION['lockout_until']) {
+        $isLocked = true;
+        $secondsRemaining = $_SESSION['lockout_until'] - time();
+        $loginError = "Account locked due to 3 failed attempts. Please wait {$secondsRemaining} seconds.";
+    } else {
+        unset($_SESSION['lockout_until'], $_SESSION['failed_attempts']);
+    }
+}
+
+if (!$isLocked && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
     if (trim($_POST['staff_pin']) === STAFF_PIN) {
+        unset($_SESSION['failed_attempts'], $_SESSION['lockout_until']);
         $_SESSION['staff_logged_in'] = true;
         header('Location: admin.php');
         exit;
     } else {
-        $loginError = 'Incorrect PIN. Please try again.';
+        $_SESSION['failed_attempts'] = ($_SESSION['failed_attempts'] ?? 0) + 1;
+        if ($_SESSION['failed_attempts'] >= 3) {
+            $_SESSION['lockout_until'] = time() + 60;
+            $loginError = 'Account locked for 1 minute due to 3 consecutive wrong attempts.';
+            $isLocked = true;
+        } else {
+            $left = 3 - $_SESSION['failed_attempts'];
+            $loginError = "Incorrect PIN. {$left} attempt(s) remaining before 1-minute lockout.";
+        }
     }
 }
 
@@ -62,10 +84,10 @@ if (!$isLoggedIn) {
             <form method="POST" action="admin.php">
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="staff_pin">Security PIN</label>
-                    <input type="password" id="staff_pin" name="staff_pin" class="form-control pin-input" maxlength="10" placeholder="••••" required autofocus autocomplete="off">
+                    <input type="password" id="staff_pin" name="staff_pin" class="form-control pin-input" maxlength="10" placeholder="••••" required autofocus autocomplete="off" <?= !empty($isLocked) ? 'disabled' : '' ?>>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem;">
-                    Unlock Dashboard
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 1rem;" <?= !empty($isLocked) ? 'disabled' : '' ?>>
+                    <?= !empty($isLocked) ? 'Locked 🔒' : 'Unlock Dashboard' ?>
                 </button>
             </form>
             <p style="margin-top: 16px; font-size: 0.8rem; color: #888;">

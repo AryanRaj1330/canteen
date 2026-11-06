@@ -133,9 +133,22 @@ switch ($action) {
             $stmt->execute([$orderNo, $name, $phone, $total]);
             $orderId = $pdo->lastInsertId();
 
-            // Insert each item into order_items table
+            // Check stock and decrement inside transaction
+            $checkStock = $pdo->prepare("SELECT stock FROM items WHERE id = ?");
+            $decStock = $pdo->prepare("UPDATE items SET stock = stock - ? WHERE id = ?");
             $itemStmt = $pdo->prepare("INSERT INTO order_items (order_id, item_name, price, quantity) VALUES (?, ?, ?, ?)");
+
             foreach ($_SESSION['cart'] as $item) {
+                $checkStock->execute([$item['id']]);
+                $currentStock = $checkStock->fetchColumn();
+
+                if ($currentStock === false || (int)$currentStock < (int)$item['qty']) {
+                    $pdo->rollBack();
+                    echo json_encode(['success' => false, 'message' => "Insufficient stock for '{$item['name']}'. Available: " . ($currentStock !== false ? $currentStock : 0)]);
+                    exit;
+                }
+
+                $decStock->execute([$item['qty'], $item['id']]);
                 $itemStmt->execute([$orderId, $item['name'], $item['price'], $item['qty']]);
             }
 

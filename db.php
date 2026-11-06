@@ -36,7 +36,8 @@ try {
             name TEXT NOT NULL,
             category TEXT NOT NULL,
             price REAL NOT NULL,
-            is_available INTEGER DEFAULT 1
+            is_available INTEGER DEFAULT 1,
+            stock INTEGER DEFAULT 15
         );
 
         CREATE TABLE IF NOT EXISTS orders (

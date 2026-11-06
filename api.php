@@ -175,6 +175,17 @@ switch ($action) {
         }
         break;
 
+    // BULK UPDATE: MARK ALL RECEIVED AS PREPARING
+    case 'bulk_prepare':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $count = $pdo->exec("UPDATE orders SET status = 'Preparing' WHERE status = 'Received'");
+        echo json_encode(['success' => true, 'updated' => $count, 'message' => "Marked {$count} orders as Preparing!"]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

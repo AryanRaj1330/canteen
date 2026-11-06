@@ -113,6 +113,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                 </p>
             </div>
             <div style="display: flex; gap: 8px;">
+                <button id="bulk-prep-btn" class="btn btn-primary btn-sm">⚡ Mark All Received as Preparing</button>
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
@@ -168,6 +169,20 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Bulk prepare button click
+        $('#bulk-prep-btn').on('click', function() {
+            if (confirm('Mark all currently Received orders as Preparing?')) {
+                $.post('api.php', { action: 'bulk_prepare' }, function(res) {
+                    if (res.success) {
+                        alert(res.message);
+                        window.location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

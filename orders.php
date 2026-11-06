@@ -12,7 +12,7 @@ $orders = fetchAllOrdersWithItems($pdo);
     <title>Live Canteen Queue Status</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="<?= !empty($_SESSION['dark_mode']) ? 'dark-mode' : '' ?>">
 
     <!-- Simple Navigation Bar -->
     <nav class="navbar">

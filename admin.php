@@ -33,7 +33,7 @@ if (!$isLoggedIn) {
     <title>Staff Login - Campus Canteen</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="<?= !empty($_SESSION['dark_mode']) ? 'dark-mode' : '' ?>">
 
     <!-- Simple Navigation Bar -->
     <nav class="navbar">

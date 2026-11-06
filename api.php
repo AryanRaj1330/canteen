@@ -175,6 +175,12 @@ switch ($action) {
         }
         break;
 
+    // TOGGLE DARK MODE THEME PREFERENCE IN SESSION
+    case 'toggle_dark_mode':
+        $_SESSION['dark_mode'] = !empty($_SESSION['dark_mode']) ? 0 : 1;
+        echo json_encode(['success' => true, 'dark_mode' => $_SESSION['dark_mode']]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

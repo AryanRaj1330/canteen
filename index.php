@@ -19,7 +19,7 @@ foreach ($items as $item) {
     <title>Canteen Pre-Order</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="<?= !empty($_SESSION['dark_mode']) ? 'dark-mode' : '' ?>">
 
     <!-- Simple Navigation Bar -->
     <nav class="navbar">
@@ -28,6 +28,7 @@ foreach ($items as $item) {
             <li><a href="index.php" class="active">Menu & Order</a></li>
             <li><a href="orders.php">Queue Status</a></li>
             <li><a href="admin.php">Staff Dashboard</a></li>
+            <li><button id="dark-toggle" class="btn btn-sm btn-secondary" style="padding: 4px 8px;">🌓 Theme</button></li>
         </ul>
     </nav>
 
@@ -144,6 +145,15 @@ foreach ($items as $item) {
                 });
             }
         }
+
+        // Dark Mode Toggle
+        $('#dark-toggle').on('click', function() {
+            $.post('api.php', { action: 'toggle_dark_mode' }, function(res) {
+                if (res.success) {
+                    $('body').toggleClass('dark-mode');
+                }
+            }, 'json');
+        });
 
         // 1. Initial Load: Fetch existing cart on page load
         $.get('api.php', { action: 'get_cart' }, function(res) {

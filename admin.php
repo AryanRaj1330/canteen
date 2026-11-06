@@ -113,6 +113,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                 </p>
             </div>
             <div style="display: flex; gap: 8px;">
+                <button id="sort-toggle-btn" class="btn btn-secondary btn-sm" data-sort="desc">Sort: Newest First ▾</button>
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
@@ -168,6 +169,41 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Sort toggle click
+        $('#sort-toggle-btn').on('click', function() {
+            var currentSort = $(this).data('sort');
+            var newSort = (currentSort === 'desc') ? 'asc' : 'desc';
+            $(this).data('sort', newSort);
+            $(this).text(newSort === 'asc' ? 'Sort: Oldest First ▴' : 'Sort: Newest First ▾');
+
+            $.get('api.php', { action: 'get_orders', sort: newSort }, function(res) {
+                if (res.success) {
+                    var $tbody = $('tbody');
+                    $tbody.empty();
+                    $.each(res.orders, function(idx, o) {
+                        var row = `
+                            <tr>
+                                <td><strong>${o.order_no}</strong></td>
+                                <td>${o.customer_name}</td>
+                                <td>${o.phone}</td>
+                                <td>${o.items_summary}</td>
+                                <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>
+                                <td>${o.order_time}</td>
+                                <td>
+                                    <select class="form-control status-select" data-id="${o.id}" style="width: auto; padding: 4px 8px;">
+                                        <option value="Received" ${o.status === 'Received' ? 'selected' : ''}>Received</option>
+                                        <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                        <option value="Ready" ${o.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                        $tbody.append(row);
+                    });
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

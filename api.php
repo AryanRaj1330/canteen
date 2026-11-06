@@ -177,7 +177,19 @@ switch ($action) {
 
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
-        $orders = fetchAllOrdersWithItems($pdo);
+        $sort = strtolower($_GET['sort'] ?? 'desc');
+        $orderDirection = ($sort === 'asc') ? 'ASC' : 'DESC';
+
+        $orders = $pdo->query("SELECT * FROM orders ORDER BY id $orderDirection")->fetchAll();
+        $items = $pdo->query("SELECT * FROM order_items")->fetchAll();
+        $itemsMap = [];
+        foreach ($items as $item) {
+            $itemsMap[$item['order_id']][] = $item['item_name'] . ' (x' . $item['quantity'] . ')';
+        }
+        foreach ($orders as &$order) {
+            $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
+            $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
+        }
         echo json_encode(['success' => true, 'orders' => $orders]);
         break;
 

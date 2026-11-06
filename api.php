@@ -175,6 +175,25 @@ switch ($action) {
         }
         break;
 
+    // GET ADMIN DASHBOARD STATS
+    case 'get_stats':
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $dateFunc = ($driver === 'sqlite') ? "DATE('now')" : "CURRENT_DATE";
+
+        $todayOrders = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at) = $dateFunc")->fetchColumn();
+        $todayRev = (float)$pdo->query("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE DATE(created_at) = $dateFunc")->fetchColumn();
+        $pending = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE status != 'Ready'")->fetchColumn();
+
+        echo json_encode([
+            'success' => true,
+            'stats' => [
+                'orders_today' => $todayOrders,
+                'revenue_today' => number_format($todayRev, 2, '.', ''),
+                'pending_orders' => $pending
+            ]
+        ]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

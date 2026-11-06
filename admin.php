@@ -118,6 +118,22 @@ $orders = fetchAllOrdersWithItems($pdo);
             </div>
         </div>
 
+        <!-- Admin KPI Summary Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div style="background: #fff; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Orders Today</div>
+                <div id="stat-orders-today" style="font-size: 2rem; font-weight: 700; color: #1e293b; margin-top: 4px;">-</div>
+            </div>
+            <div style="background: #fff; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Revenue Today</div>
+                <div id="stat-revenue-today" style="font-size: 2rem; font-weight: 700; color: #15803d; margin-top: 4px;">-</div>
+            </div>
+            <div style="background: #fff; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Pending Orders</div>
+                <div id="stat-pending-orders" style="font-size: 2rem; font-weight: 700; color: #dc2626; margin-top: 4px;">-</div>
+            </div>
+        </div>
+
         <div class="table-container">
             <table class="table">
                 <thead>
@@ -168,6 +184,18 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Load Summary Cards
+        function loadStats() {
+            $.get('api.php', { action: 'get_stats' }, function(res) {
+                if (res.success) {
+                    $('#stat-orders-today').text(res.stats.orders_today);
+                    $('#stat-revenue-today').text('₹' + res.stats.revenue_today);
+                    $('#stat-pending-orders').text(res.stats.pending_orders);
+                }
+            }, 'json');
+        }
+        loadStats();
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

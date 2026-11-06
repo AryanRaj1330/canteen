@@ -87,6 +87,15 @@ function fetchAllOrdersWithItems($pdo) {
     foreach ($orders as &$order) {
         $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
         $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
+
+        // Queue position: count earlier non-Ready orders
+        if ($order['status'] === 'Ready') {
+            $order['queue_pos'] = '-';
+        } else {
+            $qStmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE id <= ? AND status != 'Ready'");
+            $qStmt->execute([$order['id']]);
+            $order['queue_pos'] = '#' . $qStmt->fetchColumn();
+        }
     }
     return $orders;
 }

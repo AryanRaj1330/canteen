@@ -113,6 +113,7 @@ switch ($action) {
         }
 
         if (empty($name) || empty($phone)) {
+            http_response_code(422);
             echo json_encode(['success' => false, 'message' => 'Please provide both customer name and phone.']);
             exit;
         }
@@ -158,6 +159,7 @@ switch ($action) {
     // 6. UPDATE ORDER STATUS (Staff Dashboard - Protected by Staff PIN session)
     case 'update_status':
         if (empty($_SESSION['staff_logged_in'])) {
+            http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Unauthorized: Staff login required.']);
             exit;
         }
@@ -182,6 +184,7 @@ switch ($action) {
         break;
 
     default:
+        http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
 }

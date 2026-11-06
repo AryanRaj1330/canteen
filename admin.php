@@ -191,9 +191,11 @@ $orders = fetchAllOrdersWithItems($pdo);
                     $feedback.text('Failed ✕').css('color', '#dc2626').fadeIn(200);
                     alert(res.message || 'Status update failed');
                 }
-            }, 'json').fail(function() {
+            }, 'json').fail(function(xhr) {
                 $dropdown.prop('disabled', false);
-                $feedback.text('Error ✕').css('color', '#dc2626').fadeIn(200);
+                $feedback.text('HTTP ' + xhr.status + ' ✕').css('color', '#dc2626').fadeIn(200);
+                var err = xhr.responseJSON ? xhr.responseJSON.message : 'HTTP ' + xhr.status + ' error occurred';
+                alert('API Error (' + xhr.status + '): ' + err);
             });
         });
 

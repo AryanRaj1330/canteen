@@ -80,8 +80,18 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & Average rating per day using SQL AVG query
 $orders = fetchAllOrdersWithItems($pdo);
+$driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+$dateFunc = ($driver === 'sqlite') ? "DATE(created_at)" : "DATE(created_at)";
+
+$ratingStats = $pdo->query("
+    SELECT $dateFunc as r_date, ROUND(AVG(rating), 2) as avg_rating, COUNT(rating) as rated_count
+    FROM orders
+    WHERE rating IS NOT NULL
+    GROUP BY $dateFunc
+    ORDER BY r_date DESC
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,6 +126,27 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <!-- Average Rating per Day Table -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">⭐ Average Customer Rating Per Day (SQL AVG)</h3>
+            <table class="table" style="font-size: 0.9rem;">
+                <thead><tr><th>Date</th><th>Rated Orders</th><th>Average Rating</th></tr></thead>
+                <tbody>
+                    <?php if (empty($ratingStats)): ?>
+                        <tr><td colspan="3" style="text-align: center; color: #888;">No ratings recorded yet.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($ratingStats as $rs): ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($rs['r_date'] ?? date('Y-m-d')) ?></strong></td>
+                                <td><?= $rs['rated_count'] ?> review(s)</td>
+                                <td style="font-weight: 700; color: #d97706;">⭐ <?= number_format($rs['avg_rating'], 2) ?> / 5.00</td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="table-container">

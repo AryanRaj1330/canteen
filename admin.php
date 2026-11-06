@@ -80,8 +80,15 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & Best Sellers (Top 3 by quantity sold)
 $orders = fetchAllOrdersWithItems($pdo);
+$bestSellers = $pdo->query("
+    SELECT item_name, SUM(quantity) as total_qty, SUM(price * quantity) as total_revenue
+    FROM order_items 
+    GROUP BY item_name 
+    ORDER BY total_qty DESC 
+    LIMIT 3
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -115,6 +122,29 @@ $orders = fetchAllOrdersWithItems($pdo);
             <div style="display: flex; gap: 8px;">
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
+            </div>
+        </div>
+
+        <!-- Best Sellers Section -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 14px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                🏆 Best Sellers (Top 3 by Quantity Sold)
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                <?php if (empty($bestSellers)): ?>
+                    <p style="color: #64748b;">No items sold yet.</p>
+                <?php else: ?>
+                    <?php $ranks = ['🥇 1st Place', '🥈 2nd Place', '🥉 3rd Place']; ?>
+                    <?php foreach ($bestSellers as $idx => $b): ?>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px;">
+                            <span class="badge" style="background: #fef08a; color: #854d0e;"><?= $ranks[$idx] ?? '#' . ($idx+1) ?></span>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 8px 0 4px;"><?= htmlspecialchars($b['item_name']) ?></div>
+                            <div style="font-size: 0.9rem; color: #64748b;">
+                                Sold: <strong><?= $b['total_qty'] ?> units</strong> (₹<?= number_format($b['total_revenue'], 2) ?>)
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 

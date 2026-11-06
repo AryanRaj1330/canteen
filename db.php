@@ -9,11 +9,13 @@ if (!defined('STAFF_PIN')) {
     define('STAFF_PIN', '1234');
 }
 
-// Database configuration (Default XAMPP / MariaDB credentials)
-$host = 'localhost';
-$dbname = 'canteen_db';
-$username = 'root';
-$password = '';
+// Load credentials and constants from config.php
+require_once __DIR__ . '/config.php';
+
+$host = DB_HOST;
+$dbname = DB_NAME;
+$username = DB_USER;
+$password = DB_PASS;
 
 try {
     // 1. Primary: Try connecting to MySQL/MariaDB (XAMPP default)

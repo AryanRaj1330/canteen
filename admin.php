@@ -20,6 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_pin'])) {
     }
 }
 
+// Inactivity auto-logout after 10 minutes (600 seconds)
+if (!empty($_SESSION['staff_logged_in'])) {
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 600)) {
+        unset($_SESSION['staff_logged_in'], $_SESSION['last_activity']);
+        header('Location: admin.php?msg=timeout');
+        exit;
+    }
+    $_SESSION['last_activity'] = time();
+}
+
 $isLoggedIn = !empty($_SESSION['staff_logged_in']);
 
 // 3. If not logged in, show PIN login screen
@@ -52,6 +62,12 @@ if (!$isLoggedIn) {
             <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
                 Enter the staff security PIN to access orders management.
             </p>
+
+            <?php if (isset($_GET['msg']) && $_GET['msg'] === 'timeout'): ?>
+                <div class="alert alert-danger" style="margin-bottom: 16px; text-align: left;">
+                    <span>You have been automatically logged out due to 10 minutes of inactivity.</span>
+                </div>
+            <?php endif; ?>
 
             <?php if (!empty($loginError)): ?>
                 <div class="alert alert-danger" style="margin-bottom: 16px; text-align: left;">

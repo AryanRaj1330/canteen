@@ -117,6 +117,23 @@ switch ($action) {
             exit;
         }
 
+        // Rate limiting: Block a 2nd order from same phone within 2 minutes
+        $lastOrderStmt = $pdo->prepare("SELECT created_at FROM orders WHERE phone = ? ORDER BY id DESC LIMIT 1");
+        $lastOrderStmt->execute([$phone]);
+        $lastTime = $lastOrderStmt->fetchColumn();
+
+        if ($lastTime) {
+            $diffSeconds = time() - strtotime($lastTime);
+            if ($diffSeconds < 120) {
+                $wait = 120 - $diffSeconds;
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Rate Limit: Please wait {$wait} seconds before placing another order from this phone number."
+                ]);
+                exit;
+            }
+        }
+
         // Calculate final total
         $total = 0;
         foreach ($_SESSION['cart'] as $item) {

@@ -77,10 +77,27 @@ foreach ($items as $item) {
                     <!-- Populated dynamically via jQuery -->
                 </ul>
 
+                <!-- Discount Box -->
+                <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                    <input type="text" id="discount-code" class="form-control" placeholder="Discount Code (e.g. STUDENT10)" style="text-transform: uppercase; font-size: 0.85rem;">
+                    <button type="button" id="apply-discount-btn" class="btn btn-secondary btn-sm" style="white-space: nowrap;">Apply</button>
+                </div>
+                <div id="discount-feedback" style="display: none; font-size: 0.8rem; margin-bottom: 8px;"></div>
+
                 <!-- Cart Total Box -->
-                <div class="cart-total-box">
-                    <span>Total Amount:</span>
-                    <span>₹<span id="cart-total">0.00</span></span>
+                <div class="cart-total-box" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div id="subtotal-row" style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #64748b;">
+                        <span>Subtotal:</span>
+                        <span>₹<span id="cart-subtotal">0.00</span></span>
+                    </div>
+                    <div id="discount-row" style="display: none; justify-content: space-between; font-size: 0.9rem; color: #15803d; font-weight: 500;">
+                        <span>Discount (STUDENT10):</span>
+                        <span>-₹<span id="cart-discount">0.00</span></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 4px;">
+                        <span>Total Amount:</span>
+                        <span>₹<span id="cart-total">0.00</span></span>
+                    </div>
                 </div>
 
                 <!-- Customer Details & Checkout Form -->
@@ -114,6 +131,13 @@ foreach ($items as $item) {
             var $list = $('#cart-items-list');
             $list.empty();
 
+            $('#cart-subtotal').text(cartData.subtotal || cartData.total);
+            if (parseFloat(cartData.discount) > 0) {
+                $('#discount-row').css('display', 'flex');
+                $('#cart-discount').text(cartData.discount);
+            } else {
+                $('#discount-row').hide();
+            }
             $('#cart-total').text(cartData.total);
             $('#cart-count-badge').text('(' + cartData.count + ' items)');
 
@@ -177,6 +201,19 @@ foreach ($items as $item) {
                 if (res.success) {
                     renderCart(res.cart);
                 }
+            }, 'json');
+        });
+
+        // Apply discount coupon
+        $('#apply-discount-btn').on('click', function() {
+            var code = $('#discount-code').val().trim();
+            $.post('api.php', { action: 'apply_discount', code: code }, function(res) {
+                if (res.success) {
+                    $('#discount-feedback').text(res.message).css('color', '#15803d').show();
+                } else {
+                    $('#discount-feedback').text(res.message).css('color', '#dc2626').show();
+                }
+                renderCart(res.cart);
             }, 'json');
         });
 

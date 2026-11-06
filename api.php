@@ -28,9 +28,18 @@ function getCartSummary() {
         ];
     }
 
+    $discount = 0;
+    if (!empty($_SESSION['discount_code']) && $_SESSION['discount_code'] === 'STUDENT10') {
+        $discount = round($total * 0.10, 2);
+    }
+    $finalTotal = max(0, $total - $discount);
+
     return [
         'items' => $items,
-        'total' => number_format($total, 2, '.', ''),
+        'subtotal' => number_format($total, 2, '.', ''),
+        'discount' => number_format($discount, 2, '.', ''),
+        'discount_code' => $_SESSION['discount_code'] ?? '',
+        'total' => number_format($finalTotal, 2, '.', ''),
         'count' => $count
     ];
 }
@@ -97,6 +106,18 @@ switch ($action) {
         echo json_encode(['success' => true, 'cart' => getCartSummary()]);
         break;
 
+    // APPLY DISCOUNT CODE
+    case 'apply_discount':
+        $code = strtoupper(trim($_POST['code'] ?? ''));
+        if ($code === 'STUDENT10') {
+            $_SESSION['discount_code'] = 'STUDENT10';
+            echo json_encode(['success' => true, 'message' => 'Coupon STUDENT10 applied! 10% discount', 'cart' => getCartSummary()]);
+        } else {
+            unset($_SESSION['discount_code']);
+            echo json_encode(['success' => false, 'message' => 'Invalid discount code', 'cart' => getCartSummary()]);
+        }
+        break;
+
     // 4. GET CART STATUS
     case 'get_cart':
         echo json_encode(['success' => true, 'cart' => getCartSummary()]);
@@ -128,9 +149,16 @@ switch ($action) {
 
         $pdo->beginTransaction();
         try {
-            // Insert into orders table
-            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, status) VALUES (?, ?, ?, ?, 'Received')");
-            $stmt->execute([$orderNo, $name, $phone, $total]);
+            // Calculate discount
+            $discount = 0;
+            if (!empty($_SESSION['discount_code']) && $_SESSION['discount_code'] === 'STUDENT10') {
+                $discount = round($total * 0.10, 2);
+            }
+            $finalTotal = max(0, $total - $discount);
+
+            // Insert into orders table with discount
+            $stmt = $pdo->prepare("INSERT INTO orders (order_no, customer_name, phone, total_amount, discount, status) VALUES (?, ?, ?, ?, ?, 'Received')");
+            $stmt->execute([$orderNo, $name, $phone, $finalTotal, $discount]);
             $orderId = $pdo->lastInsertId();
 
             // Insert each item into order_items table

@@ -80,8 +80,9 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & menu items for price editing
 $orders = fetchAllOrdersWithItems($pdo);
+$allItems = $pdo->query("SELECT * FROM items ORDER BY category, name")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,6 +117,29 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <!-- Inline Item Price Edit Table -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Inline Menu Item Price Edit (AJAX)</h3>
+            <table class="table" style="font-size: 0.9rem;">
+                <thead><tr><th>Item</th><th>Category</th><th>Current Price (₹)</th><th>Save</th></tr></thead>
+                <tbody>
+                    <?php foreach ($allItems as $it): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($it['name']) ?></td>
+                            <td><?= htmlspecialchars($it['category']) ?></td>
+                            <td>
+                                <input type="number" step="0.50" min="1" class="form-control item-price-input" data-id="<?= $it['id'] ?>" value="<?= htmlspecialchars($it['price']) ?>" style="width: 120px; padding: 4px 8px;">
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm save-price-btn" data-id="<?= $it['id'] ?>">Save</button>
+                                <span class="price-feedback" id="price-feedback-<?= $it['id'] ?>" style="display:none; margin-left: 8px; font-weight: bold; color: #15803d;">✓ Saved</span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="table-container">
@@ -168,6 +192,22 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Handle inline price update
+        $('.save-price-btn').on('click', function() {
+            var itemId = $(this).data('id');
+            var $input = $('.item-price-input[data-id="' + itemId + '"]');
+            var newPrice = $input.val();
+            var $feedback = $('#price-feedback-' + itemId);
+
+            $.post('api.php', { action: 'update_item_price', item_id: itemId, price: newPrice }, function(res) {
+                if (res.success) {
+                    $feedback.fadeIn(200).delay(1500).fadeOut(400);
+                } else {
+                    alert(res.message);
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

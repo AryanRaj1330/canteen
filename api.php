@@ -175,6 +175,26 @@ switch ($action) {
         }
         break;
 
+    // UPDATE ITEM PRICE (AJAX with PHP validation)
+    case 'update_item_price':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $itemId = (int)($_POST['item_id'] ?? 0);
+        $price = (float)($_POST['price'] ?? 0);
+
+        if ($itemId <= 0 || $price <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Price must be greater than zero.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE items SET price = ? WHERE id = ?");
+        $stmt->execute([$price, $itemId]);
+        echo json_encode(['success' => true, 'price' => number_format($price, 2, '.', '')]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

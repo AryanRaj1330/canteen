@@ -123,8 +123,10 @@ switch ($action) {
             $total += $item['price'] * $item['qty'];
         }
 
-        // Generate unique order number (e.g. ORD-7429)
-        $orderNo = 'ORD-' . strtoupper(substr(uniqid(), -4));
+        // Generate sequential order number safely (ORD-001, ORD-002, ...)
+        $maxStmt = $pdo->query("SELECT COALESCE(MAX(id), 0) + 1 FROM orders");
+        $nextSeq = (int)$maxStmt->fetchColumn();
+        $orderNo = sprintf('ORD-%03d', $nextSeq);
 
         $pdo->beginTransaction();
         try {

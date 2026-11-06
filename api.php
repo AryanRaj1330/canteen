@@ -167,8 +167,16 @@ switch ($action) {
         $allowedStatuses = ['Received', 'Preparing', 'Ready'];
 
         if ($orderId > 0 && in_array($status, $allowedStatuses, true)) {
+            $currStmt = $pdo->prepare("SELECT status FROM orders WHERE id = ?");
+            $currStmt->execute([$orderId]);
+            $oldStatus = $currStmt->fetchColumn() ?: 'Received';
+
             $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
             $stmt->execute([$status, $orderId]);
+
+            // Insert into status_history
+            $histStmt = $pdo->prepare("INSERT INTO status_history (order_id, old_status, new_status) VALUES (?, ?, ?)");
+            $histStmt->execute([$orderId, $oldStatus, $status]);
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid order ID or status']);

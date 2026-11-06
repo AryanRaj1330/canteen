@@ -80,8 +80,14 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders and status history
 $orders = fetchAllOrdersWithItems($pdo);
+$histories = $pdo->query("SELECT * FROM status_history ORDER BY id DESC")->fetchAll();
+$historyMap = [];
+foreach ($histories as $h) {
+    $time = date('h:i A', strtotime($h['changed_at']));
+    $historyMap[$h['order_id']][] = "{$h['old_status']} &rarr; {$h['new_status']} ($time)";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -128,6 +134,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Items Ordered</th>
                         <th>Total</th>
                         <th>Time</th>
+                        <th>Status History</th>
                         <th>Update Status</th>
                     </tr>
                 </thead>
@@ -145,6 +152,9 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
+                                <td style="font-size: 0.8rem; color: #64748b;">
+                                    <?= !empty($historyMap[$order['id']]) ? implode('<br>', $historyMap[$order['id']]) : '<span style="color:#94a3b8;">Initial: Received</span>' ?>
+                                </td>
                                 <td>
                                     <div style="display: flex; align-items: center;">
                                         <select class="form-control status-select" data-id="<?= $order['id'] ?>" style="width: auto; padding: 4px 8px;">

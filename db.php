@@ -31,6 +31,14 @@ try {
 
     // Create tables if they do not exist
     $pdo->exec("
+        CREATE TABLE IF NOT EXISTS status_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            old_status TEXT NOT NULL,
+            new_status TEXT NOT NULL,
+            changed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,

@@ -126,6 +126,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Customer</th>
                         <th>Phone</th>
                         <th>Items Ordered</th>
+                        <th>Notes for Kitchen</th>
                         <th>Total</th>
                         <th>Time</th>
                         <th>Update Status</th>
@@ -138,11 +139,18 @@ $orders = fetchAllOrdersWithItems($pdo);
                         </tr>
                     <?php else: ?>
                         <?php foreach ($orders as $order): ?>
-                            <tr>
+                            <tr style="<?= !empty($order['notes']) ? 'background-color: #fef9c3 !important;' : '' ?>">
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
+                                <td>
+                                    <?php if (!empty($order['notes'])): ?>
+                                        <span style="font-weight: 600; color: #b45309;">⚠️ <?= htmlspecialchars($order['notes']) ?></span>
+                                    <?php else: ?>
+                                        <span style="color: #94a3b8; font-size: 0.85rem;">None</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
                                 <td>

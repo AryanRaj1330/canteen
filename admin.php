@@ -113,6 +113,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                 </p>
             </div>
             <div style="display: flex; gap: 8px;">
+                <button id="cleanup-btn" class="btn btn-danger-outline btn-sm">🧹 Cleanup Old Orders (>7 Days)</button>
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
@@ -168,6 +169,20 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Cleanup old completed orders
+        $('#cleanup-btn').on('click', function() {
+            if (confirm('Delete completed orders older than 7 days? This action cannot be undone.')) {
+                $.post('api.php', { action: 'cleanup_completed' }, function(res) {
+                    if (res.success) {
+                        alert(res.message);
+                        window.location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

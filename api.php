@@ -175,6 +175,22 @@ switch ($action) {
         }
         break;
 
+    // CLEANUP COMPLETED ORDERS OLDER THAN 7 DAYS
+    case 'cleanup_completed':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $dateCond = ($driver === 'sqlite')
+            ? "created_at < DATETIME('now', '-7 days')"
+            : "created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)";
+
+        $stmt = $pdo->exec("DELETE FROM orders WHERE (status = 'Completed' OR status = 'Ready') AND $dateCond");
+        echo json_encode(['success' => true, 'deleted' => $stmt, 'message' => "Deleted {$stmt} old completed order(s)."]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

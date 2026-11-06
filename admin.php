@@ -80,8 +80,9 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & menu items
 $orders = fetchAllOrdersWithItems($pdo);
+$allItems = $pdo->query("SELECT * FROM items ORDER BY category, name")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -115,6 +116,21 @@ $orders = fetchAllOrdersWithItems($pdo);
             <div style="display: flex; gap: 8px;">
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
+            </div>
+        </div>
+
+        <!-- Item Availability Toggle Table -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">Menu Item Availability (Toggle for Menu display)</h3>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <?php foreach ($allItems as $it): ?>
+                    <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 6px;">
+                        <span style="font-size: 0.9rem; font-weight: 500;"><?= htmlspecialchars($it['name']) ?></span>
+                        <button class="btn btn-sm toggle-avail-btn <?= $it['is_available'] ? 'btn-success' : 'btn-danger-outline' ?>" data-id="<?= $it['id'] ?>">
+                            <?= $it['is_available'] ? 'Available ✓' : 'Hidden ✕' ?>
+                        </button>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -168,6 +184,23 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Handle Item Availability Toggle
+        $('.toggle-avail-btn').on('click', function() {
+            var $btn = $(this);
+            var itemId = $btn.data('id');
+            $.post('api.php', { action: 'toggle_item_availability', item_id: itemId }, function(res) {
+                if (res.success) {
+                    if (res.is_available === 1) {
+                        $btn.removeClass('btn-danger-outline').addClass('btn-success').text('Available ✓');
+                    } else {
+                        $btn.removeClass('btn-success').addClass('btn-danger-outline').text('Hidden ✕');
+                    }
+                } else {
+                    alert(res.message);
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

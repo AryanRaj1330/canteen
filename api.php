@@ -175,6 +175,20 @@ switch ($action) {
         }
         break;
 
+    // TOGGLE ITEM AVAILABILITY
+    case 'toggle_item_availability':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $itemId = (int)($_POST['item_id'] ?? 0);
+        $stmt = $pdo->prepare("UPDATE items SET is_available = 1 - is_available WHERE id = ?");
+        $stmt->execute([$itemId]);
+        $newStatus = $pdo->query("SELECT is_available FROM items WHERE id = $itemId")->fetchColumn();
+        echo json_encode(['success' => true, 'is_available' => (int)$newStatus]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

@@ -95,6 +95,14 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select id="payment_method" name="payment_method" class="form-control" required>
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                        </select>
+                    </div>
+
                     <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
                         Place Pre-Order
                     </button>

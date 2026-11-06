@@ -45,6 +45,7 @@ try {
             customer_name TEXT NOT NULL,
             phone TEXT NOT NULL,
             total_amount REAL NOT NULL,
+            payment_method TEXT DEFAULT 'Cash',
             status TEXT DEFAULT 'Received',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );

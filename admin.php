@@ -126,6 +126,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Customer</th>
                         <th>Phone</th>
                         <th>Items Ordered</th>
+                        <th>Payment</th>
                         <th>Total</th>
                         <th>Time</th>
                         <th>Update Status</th>
@@ -143,6 +144,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>
+                                <td><span class="badge" style="background:#f1f5f9; color:#334155;"><?= htmlspecialchars($order['payment_method'] ?? 'Cash') ?></span></td>
                                 <td>₹<?= number_format($order['total_amount'], 2) ?></td>
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
                                 <td>

@@ -175,6 +175,31 @@ switch ($action) {
         }
         break;
 
+    // RE-ORDER ITEMS INTO SESSION CART
+    case 'reorder':
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $orderItems = $pdo->prepare("SELECT oi.item_name, oi.price, oi.quantity, i.id FROM order_items oi LEFT JOIN items i ON oi.item_name = i.name WHERE oi.order_id = ?");
+        $orderItems->execute([$orderId]);
+        $rows = $orderItems->fetchAll();
+
+        if (empty($rows)) {
+            echo json_encode(['success' => false, 'message' => 'No items found in this order']);
+            exit;
+        }
+
+        foreach ($rows as $r) {
+            $itemId = (int)($r['id'] ?? rand(1, 6));
+            $_SESSION['cart'][$itemId] = [
+                'id'    => $itemId,
+                'name'  => $r['item_name'],
+                'price' => (float)$r['price'],
+                'qty'   => (int)$r['quantity']
+            ];
+        }
+
+        echo json_encode(['success' => true, 'cart' => getCartSummary()]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

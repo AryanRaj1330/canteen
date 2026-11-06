@@ -1,6 +1,11 @@
 <?php
 require_once 'db.php';
 
+// Generate session CSRF token if not set
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+}
+
 // Fetch available menu items from database
 $stmt = $pdo->query("SELECT * FROM items WHERE is_available = 1 ORDER BY category ASC, name ASC");
 $items = $stmt->fetchAll();
@@ -85,6 +90,7 @@ foreach ($items as $item) {
 
                 <!-- Customer Details & Checkout Form -->
                 <form id="checkout-form">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                     <div class="form-group">
                         <label for="customer_name">Your Name</label>
                         <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="e.g. Rahul Sharma" required>

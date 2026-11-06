@@ -104,6 +104,12 @@ switch ($action) {
 
     // 5. CHECKOUT (PLACE ORDER)
     case 'checkout':
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (empty($csrfToken) || empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+            echo json_encode(['success' => false, 'message' => 'Security error: Invalid or missing CSRF token.']);
+            exit;
+        }
+
         $name = trim($_POST['customer_name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
 

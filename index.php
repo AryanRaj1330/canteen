@@ -95,6 +95,11 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="notes">Special Instructions</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="e.g. Extra spicy, less oil, no onion..."></textarea>
+                    </div>
+
                     <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
                         Place Pre-Order
                     </button>

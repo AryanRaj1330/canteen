@@ -44,6 +44,7 @@ try {
             order_no TEXT NOT NULL UNIQUE,
             customer_name TEXT NOT NULL,
             phone TEXT NOT NULL,
+            notes TEXT,
             total_amount REAL NOT NULL,
             status TEXT DEFAULT 'Received',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP

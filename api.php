@@ -141,13 +141,18 @@ switch ($action) {
 
             $pdo->commit();
 
+            // Calculate estimated wait time: 5 minutes * non-Ready orders
+            $pendingOrders = $pdo->query("SELECT COUNT(*) FROM orders WHERE status != 'Ready'")->fetchColumn();
+            $estimatedWaitTime = max(5, (int)$pendingOrders * 5);
+
             // Clear session cart
             $_SESSION['cart'] = [];
 
             echo json_encode([
-                'success'  => true,
-                'order_no' => $orderNo,
-                'message'  => "Order placed successfully! Your Order No is #$orderNo"
+                'success'   => true,
+                'order_no'  => $orderNo,
+                'wait_time' => $estimatedWaitTime,
+                'message'   => "Order placed successfully! Your Order No is #$orderNo"
             ]);
         } catch (Exception $e) {
             $pdo->rollBack();

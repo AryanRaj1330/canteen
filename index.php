@@ -204,11 +204,12 @@ foreach ($items as $item) {
                 $btn.text('Place Pre-Order');
 
                 if (res.success) {
-                    // Show success banner with direct link to live queue
+                    // Show success banner with direct link to live queue and wait time
                     $('#order-alert').html(`
-                        <div class="alert alert-success">
+                        <div class="alert alert-success" style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <strong>Success!</strong> ${res.message}.
+                                <div><strong>Success!</strong> ${res.message}.</div>
+                                <div style="margin-top: 4px; font-weight: 600; color: #166534;">⏱ Estimated Wait Time: ~${res.wait_time} minutes</div>
                             </div>
                             <a href="orders.php" class="btn btn-primary btn-sm">View Queue Status</a>
                         </div>

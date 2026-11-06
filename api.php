@@ -175,6 +175,14 @@ switch ($action) {
         }
         break;
 
+    // SEARCH MENU ITEMS
+    case 'search_items':
+        $q = trim($_GET['q'] ?? '');
+        $stmt = $pdo->prepare("SELECT * FROM items WHERE is_available = 1 AND name LIKE ? ORDER BY category, name");
+        $stmt->execute(['%' . $q . '%']);
+        echo json_encode(['success' => true, 'items' => $stmt->fetchAll()]);
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

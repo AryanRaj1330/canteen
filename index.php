@@ -38,7 +38,10 @@ foreach ($items as $item) {
         <div class="main-layout">
             <!-- Left Column: Menu Items -->
             <div class="menu-section">
-                <h1 class="page-title">Available Menu</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h1 class="page-title" style="margin-bottom: 0;">Available Menu</h1>
+                    <input type="text" id="menu-search-input" class="form-control" placeholder="🔍 Search menu items..." style="max-width: 250px;">
+                </div>
 
                 <?php if (empty($categories)): ?>
                     <p>No menu items available right now. Please check back later.</p>
@@ -144,6 +147,19 @@ foreach ($items as $item) {
                 });
             }
         }
+
+        // Live search filter on menu
+        $('#menu-search-input').on('input', function() {
+            var search = $(this).val().toLowerCase().trim();
+            $('.item-card').each(function() {
+                var itemName = $(this).find('.item-name').text().toLowerCase();
+                if (itemName.indexOf(search) !== -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
 
         // 1. Initial Load: Fetch existing cart on page load
         $.get('api.php', { action: 'get_cart' }, function(res) {

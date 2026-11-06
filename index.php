@@ -1,6 +1,12 @@
 <?php
 require_once 'db.php';
 
+// Daily order limit check
+$driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+$dateFunc = ($driver === 'sqlite') ? "DATE('now')" : "CURRENT_DATE";
+$todayOrdersCount = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at) = $dateFunc")->fetchColumn();
+$isLimitReached = ($todayOrdersCount >= 50);
+
 // Fetch available menu items from database
 $stmt = $pdo->query("SELECT * FROM items WHERE is_available = 1 ORDER BY category ASC, name ASC");
 $items = $stmt->fetchAll();
@@ -34,6 +40,12 @@ foreach ($items as $item) {
     <div class="container">
         <!-- Order Placement Notification Area -->
         <div id="order-alert" style="display: none;"></div>
+
+        <?php if ($isLimitReached): ?>
+            <div class="alert alert-danger" style="font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 24px;">
+                🛑 Orders closed for today (Daily capacity limit of 50 orders reached).
+            </div>
+        <?php endif; ?>
 
         <div class="main-layout">
             <!-- Left Column: Menu Items -->
@@ -95,8 +107,8 @@ foreach ($items as $item) {
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 9876543210" required>
                     </div>
 
-                    <button type="submit" id="place-order-btn" class="btn btn-success" disabled>
-                        Place Pre-Order
+                    <button type="submit" id="place-order-btn" class="btn btn-success" <?= !empty($isLimitReached) ? 'disabled title="Orders closed for today"' : 'disabled' ?>>
+                        <?= !empty($isLimitReached) ? 'Orders Closed' : 'Place Pre-Order' ?>
                     </button>
                 </form>
             </div>

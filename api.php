@@ -107,6 +107,15 @@ switch ($action) {
         $name = trim($_POST['customer_name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
 
+        // Daily limit of 50 orders
+        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $dateFunc = ($driver === 'sqlite') ? "DATE('now')" : "CURRENT_DATE";
+        $todayCount = (int)$pdo->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at) = $dateFunc")->fetchColumn();
+        if ($todayCount >= 50) {
+            echo json_encode(['success' => false, 'message' => 'Orders closed for today: Daily capacity limit of 50 orders reached.']);
+            exit;
+        }
+
         if (empty($_SESSION['cart'])) {
             echo json_encode(['success' => false, 'message' => 'Your cart is empty. Please add items.']);
             exit;

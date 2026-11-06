@@ -80,8 +80,17 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & hourly order analytics
 $orders = fetchAllOrdersWithItems($pdo);
+$driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+$hourFunc = ($driver === 'sqlite') ? "strftime('%H', created_at)" : "HOUR(created_at)";
+
+$hourlyOrders = $pdo->query("
+    SELECT $hourFunc as order_hr, COUNT(*) as cnt, SUM(total_amount) as hr_rev
+    FROM orders
+    GROUP BY $hourFunc
+    ORDER BY order_hr ASC
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,6 +125,27 @@ $orders = fetchAllOrdersWithItems($pdo);
                 <a href="admin.php" class="btn btn-primary btn-sm">↻ Reload Table</a>
                 <a href="admin.php?action=logout" class="btn btn-danger-outline btn-sm">Log Out</a>
             </div>
+        </div>
+
+        <!-- Orders per hour Table -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: #1e293b;">📊 Orders Per Hour (SQL GROUP BY Hour)</h3>
+            <table class="table" style="font-size: 0.9rem;">
+                <thead><tr><th>Hour Window</th><th>Orders Received</th><th>Hourly Sales</th></tr></thead>
+                <tbody>
+                    <?php if (empty($hourlyOrders)): ?>
+                        <tr><td colspan="3" style="text-align: center; color: #888;">No orders recorded yet.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($hourlyOrders as $ho): ?>
+                            <tr>
+                                <td><strong><?= sprintf('%02d:00 - %02d:00', (int)$ho['order_hr'], ((int)$ho['order_hr'] + 1) % 24) ?></strong></td>
+                                <td><?= $ho['cnt'] ?> order(s)</td>
+                                <td style="font-weight: 600; color: #15803d;">₹<?= number_format($ho['hr_rev'], 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="table-container">

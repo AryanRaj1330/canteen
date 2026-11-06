@@ -141,6 +141,9 @@ switch ($action) {
 
             $pdo->commit();
 
+            // Store last placed order number in session
+            $_SESSION['last_order_no'] = $orderNo;
+
             // Clear session cart
             $_SESSION['cart'] = [];
 

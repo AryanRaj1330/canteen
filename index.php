@@ -35,6 +35,13 @@ foreach ($items as $item) {
         <!-- Order Placement Notification Area -->
         <div id="order-alert" style="display: none;"></div>
 
+        <?php if (!empty($_SESSION['last_order_no'])): ?>
+            <div class="alert alert-success" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>Your last placed order is <strong>#<?= htmlspecialchars($_SESSION['last_order_no']) ?></strong>.</div>
+                <a href="orders.php" class="btn btn-primary btn-sm">Track in Queue &rarr;</a>
+            </div>
+        <?php endif; ?>
+
         <div class="main-layout">
             <!-- Left Column: Menu Items -->
             <div class="menu-section">

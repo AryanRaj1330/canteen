@@ -45,6 +45,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <th>Total</th>
                         <th>Time</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="orders-tbody">
@@ -65,10 +66,18 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         $badgeClass = 'badge-received';
                                         if ($order['status'] === 'Preparing') $badgeClass = 'badge-preparing';
                                         if ($order['status'] === 'Ready') $badgeClass = 'badge-ready';
+                                        if ($order['status'] === 'Cancelled') $badgeClass = 'badge-cancelled';
                                     ?>
                                     <span class="badge <?= $badgeClass ?>">
                                         <?= htmlspecialchars($order['status']) ?>
                                     </span>
+                                </td>
+                                <td>
+                                    <?php if ($order['status'] === 'Received'): ?>
+                                        <button class="btn btn-sm btn-danger-outline cancel-btn" data-id="<?= $order['id'] ?>">Cancel</button>
+                                    <?php else: ?>
+                                        <span style="color: #94a3b8; font-size: 0.85rem;">-</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -89,6 +98,7 @@ $orders = fetchAllOrdersWithItems($pdo);
             switch (status) {
                 case 'Preparing': return 'badge-preparing';
                 case 'Ready': return 'badge-ready';
+                case 'Cancelled': return 'badge-cancelled';
                 default: return 'badge-received';
             }
         }
@@ -113,6 +123,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                     <td>₹${parseFloat(o.total_amount).toFixed(2)}</td>
                                     <td>${o.order_time}</td>
                                     <td><span class="badge ${badgeClass}">${o.status}</span></td>
+                                    <td>${o.status === 'Received' ? `<button class="btn btn-sm btn-danger-outline cancel-btn" data-id="${o.id}">Cancel</button>` : '<span style="color: #94a3b8; font-size: 0.85rem;">-</span>'}</td>
                                 </tr>
                             `;
                             $tbody.append(row);
@@ -128,6 +139,20 @@ $orders = fetchAllOrdersWithItems($pdo);
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);
+
+        // Customer order cancellation
+        $(document).on('click', '.cancel-btn', function() {
+            var orderId = $(this).data('id');
+            if (confirm('Are you sure you want to cancel this order?')) {
+                $.post('api.php', { action: 'cancel_order', order_id: orderId }, function(res) {
+                    if (res.success) {
+                        refreshOrders();
+                    } else {
+                        alert(res.message);
+                    }
+                }, 'json');
+            }
+        });
 
         // Manual refresh button click
         $('#manual-refresh-btn').on('click', function() {

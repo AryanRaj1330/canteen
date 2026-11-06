@@ -175,6 +175,27 @@ switch ($action) {
         }
         break;
 
+    // CUSTOMER CANCEL ORDER (Only while Received)
+    case 'cancel_order':
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        if ($orderId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Invalid order ID']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        $currStatus = $stmt->fetchColumn();
+
+        if ($currStatus === 'Received') {
+            $upStmt = $pdo->prepare("UPDATE orders SET status = 'Cancelled' WHERE id = ?");
+            $upStmt->execute([$orderId]);
+            echo json_encode(['success' => true, 'message' => 'Order cancelled successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Orders can only be cancelled while status is Received.']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

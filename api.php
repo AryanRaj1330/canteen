@@ -117,6 +117,12 @@ switch ($action) {
             exit;
         }
 
+        // Server-side name validation: max 50 chars, letters and spaces only
+        if (!preg_match('/^[a-zA-Z\s]{1,50}$/', $name)) {
+            echo json_encode(['success' => false, 'field' => 'customer_name', 'message' => 'Name must contain only letters and spaces (maximum 50 characters).']);
+            exit;
+        }
+
         // Calculate final total
         $total = 0;
         foreach ($_SESSION['cart'] as $item) {

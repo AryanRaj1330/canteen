@@ -88,6 +88,7 @@ foreach ($items as $item) {
                     <div class="form-group">
                         <label for="customer_name">Your Name</label>
                         <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                        <div id="name-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 4px; display: none;"></div>
                     </div>
 
                     <div class="form-group">
@@ -194,6 +195,7 @@ foreach ($items as $item) {
         // 5. Submit Pre-Order (Checkout)
         $('#checkout-form').on('submit', function(e) {
             e.preventDefault();
+            $('#name-error').hide();
 
             var $btn = $('#place-order-btn');
             $btn.prop('disabled', true).text('Placing Order...');
@@ -224,7 +226,11 @@ foreach ($items as $item) {
                     $('html, body').animate({ scrollTop: 0 }, 'fast');
                 } else {
                     $btn.prop('disabled', false);
-                    alert(res.message || 'Checkout failed');
+                    if (res.field === 'customer_name') {
+                        $('#name-error').text(res.message).show();
+                    } else {
+                        alert(res.message || 'Checkout failed');
+                    }
                 }
             }, 'json').fail(function() {
                 $btn.prop('disabled', false).text('Place Pre-Order');

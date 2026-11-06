@@ -80,8 +80,10 @@ if (!$isLoggedIn) {
     exit;
 }
 
-// 4. Fetch all orders for authenticated staff view
+// 4. Fetch all orders & calculate all-time summary footer in PHP
 $orders = fetchAllOrdersWithItems($pdo);
+$totalOrdersEver = count($orders);
+$totalRevenueEver = array_sum(array_column($orders, 'total_amount'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -159,6 +161,16 @@ $orders = fetchAllOrdersWithItems($pdo);
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
+                <tfoot style="background: #f1f5f9; font-weight: bold; border-top: 2px solid #cbd5e1;">
+                    <tr>
+                        <td colspan="4" style="padding: 12px 16px; color: #1e293b;">
+                            TOTAL ORDERS EVER: <?= $totalOrdersEver ?>
+                        </td>
+                        <td colspan="3" style="padding: 12px 16px; color: #15803d; font-size: 1.05rem;">
+                            TOTAL REVENUE: ₹<?= number_format($totalRevenueEver, 2) ?>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>

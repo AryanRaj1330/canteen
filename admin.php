@@ -147,7 +147,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                                 <td><?= htmlspecialchars($order['order_time']) ?></td>
                                 <td>
                                     <div style="display: flex; align-items: center;">
-                                        <select class="form-control status-select" data-id="<?= $order['id'] ?>" style="width: auto; padding: 4px 8px;">
+                                        <select class="form-control status-select" data-id="<?= $order['id'] ?>" data-current="<?= $order['status'] ?>" style="width: auto; padding: 4px 8px;">
                                             <option value="Received" <?= $order['status'] === 'Received' ? 'selected' : '' ?>>Received</option>
                                             <option value="Preparing" <?= $order['status'] === 'Preparing' ? 'selected' : '' ?>>Preparing</option>
                                             <option value="Ready" <?= $order['status'] === 'Ready' ? 'selected' : '' ?>>Ready</option>
@@ -186,9 +186,12 @@ $orders = fetchAllOrdersWithItems($pdo);
                 $dropdown.prop('disabled', false);
 
                 if (res.success) {
+                    $dropdown.data('current', newStatus);
                     $feedback.text('Saved ✓').css('color', '#15803d').fadeIn(200).delay(1500).fadeOut(400);
                 } else {
-                    $feedback.text('Failed ✕').css('color', '#dc2626').fadeIn(200);
+                    // Revert dropdown in UI
+                    $dropdown.val($dropdown.data('current'));
+                    $feedback.text('Reverted ✕').css('color', '#dc2626').fadeIn(200).delay(2000).fadeOut(400);
                     alert(res.message || 'Status update failed');
                 }
             }, 'json').fail(function() {

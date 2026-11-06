@@ -167,6 +167,15 @@ switch ($action) {
         $allowedStatuses = ['Received', 'Preparing', 'Ready'];
 
         if ($orderId > 0 && in_array($status, $allowedStatuses, true)) {
+            // Check status sequence to prevent moving backward
+            $ranks = ['Received' => 1, 'Preparing' => 2, 'Ready' => 3];
+            $currStatus = $pdo->query("SELECT status FROM orders WHERE id = $orderId")->fetchColumn() ?: 'Received';
+
+            if (($ranks[$status] ?? 0) < ($ranks[$currStatus] ?? 0)) {
+                echo json_encode(['success' => false, 'message' => "Invalid transition: Status cannot be moved backward from '{$currStatus}' to '{$status}'."]);
+                exit;
+            }
+
             $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
             $stmt->execute([$status, $orderId]);
             echo json_encode(['success' => true]);

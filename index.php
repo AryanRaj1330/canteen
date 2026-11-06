@@ -72,6 +72,7 @@ foreach ($items as $item) {
                     <span id="cart-count-badge" style="font-size: 0.9rem; font-weight: normal; color: #666;">(0 items)</span>
                 </div>
 
+                <div id="cart-limit-msg" style="display: none; background: #fee2e2; color: #dc2626; padding: 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px;"></div>
                 <!-- Dynamic Cart Items Container -->
                 <ul class="cart-items" id="cart-items-list">
                     <!-- Populated dynamically via jQuery -->
@@ -161,9 +162,10 @@ foreach ($items as $item) {
             $.post('api.php', { action: 'add', item_id: itemId }, function(res) {
                 $btn.prop('disabled', false);
                 if (res.success) {
+                    $('#cart-limit-msg').hide();
                     renderCart(res.cart);
                 } else {
-                    alert(res.message || 'Could not add item');
+                    $('#cart-limit-msg').text(res.message || 'Limit reached').show().delay(3500).fadeOut();
                 }
             }, 'json');
         });
@@ -175,7 +177,11 @@ foreach ($items as $item) {
 
             $.post('api.php', { action: 'update', item_id: itemId, qty: newQty }, function(res) {
                 if (res.success) {
+                    $('#cart-limit-msg').hide();
                     renderCart(res.cart);
+                } else {
+                    $('#cart-limit-msg').text(res.message || 'Limit reached').show().delay(3500).fadeOut();
+                    if (res.cart) renderCart(res.cart);
                 }
             }, 'json');
         });

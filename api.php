@@ -48,6 +48,10 @@ switch ($action) {
         }
 
         if (isset($_SESSION['cart'][$itemId])) {
+            if ($_SESSION['cart'][$itemId]['qty'] >= 10) {
+                echo json_encode(['success' => false, 'message' => 'Maximum limit of 10 items reached for this item.']);
+                exit;
+            }
             $_SESSION['cart'][$itemId]['qty'] += 1;
         } else {
             // Verify item from database
@@ -77,6 +81,10 @@ switch ($action) {
         $qty = (int)($_POST['qty'] ?? 0);
 
         if ($itemId > 0) {
+            if ($qty > 10) {
+                echo json_encode(['success' => false, 'message' => 'Cannot exceed maximum quantity of 10 per item.', 'cart' => getCartSummary()]);
+                exit;
+            }
             if ($qty <= 0) {
                 unset($_SESSION['cart'][$itemId]);
             } elseif (isset($_SESSION['cart'][$itemId])) {

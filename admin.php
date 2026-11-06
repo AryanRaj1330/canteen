@@ -154,6 +154,12 @@ $orders = fetchAllOrdersWithItems($pdo);
                                         </select>
                                         <span class="status-feedback" id="feedback-<?= $order['id'] ?>" style="display: none;">Saved ✓</span>
                                     </div>
+                                    <?php if ($order['status'] === 'Preparing' && !empty($order['prep_started_at'])): ?>
+                                        <?php $prepMins = max(1, round((time() - strtotime($order['prep_started_at'])) / 60)); ?>
+                                        <div style="font-size: 0.8rem; color: #0284c7; margin-top: 4px; font-weight: 600;">
+                                            ⏳ Preparing for <?= $prepMins ?> min
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

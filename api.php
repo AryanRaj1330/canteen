@@ -167,7 +167,11 @@ switch ($action) {
         $allowedStatuses = ['Received', 'Preparing', 'Ready'];
 
         if ($orderId > 0 && in_array($status, $allowedStatuses, true)) {
-            $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            if ($status === 'Preparing') {
+                $stmt = $pdo->prepare("UPDATE orders SET status = ?, prep_started_at = CURRENT_TIMESTAMP WHERE id = ?");
+            } else {
+                $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            }
             $stmt->execute([$status, $orderId]);
             echo json_encode(['success' => true]);
         } else {

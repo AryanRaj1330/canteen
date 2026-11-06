@@ -49,6 +49,13 @@ try {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE VIEW IF NOT EXISTS order_summary AS
+        SELECT o.*, 
+               COALESCE(GROUP_CONCAT(oi.item_name || ' (x' || oi.quantity || ')', ', '), 'No items') AS items_summary
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        GROUP BY o.id;
+
         CREATE TABLE IF NOT EXISTS order_items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id INTEGER NOT NULL,
@@ -76,16 +83,14 @@ try {
 
 // Helper function to fetch all orders with their ordered items (works universally)
 function fetchAllOrdersWithItems($pdo) {
-    $orders = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();
-    $items = $pdo->query("SELECT * FROM order_items")->fetchAll();
-
-    $itemsMap = [];
-    foreach ($items as $item) {
-        $itemsMap[$item['order_id']][] = $item['item_name'] . ' (x' . $item['quantity'] . ')';
+    // Read directly from SQL View order_summary
+    try {
+        $orders = $pdo->query("SELECT * FROM order_summary ORDER BY id DESC")->fetchAll();
+    } catch (Exception $e) {
+        $orders = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();
     }
-
     foreach ($orders as &$order) {
-        $order['items_summary'] = isset($itemsMap[$order['id']]) ? implode(', ', $itemsMap[$order['id']]) : 'No items';
+        if (!isset($order['items_summary'])) $order['items_summary'] = 'No items';
         $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
     }
     return $orders;

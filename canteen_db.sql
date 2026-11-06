@@ -34,6 +34,14 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
+-- SQL View: order_summary with aggregated items
+CREATE OR REPLACE VIEW order_summary AS
+SELECT o.*, 
+       COALESCE(GROUP_CONCAT(CONCAT(oi.item_name, ' (x', oi.quantity, ')') SEPARATOR ', '), 'No items') AS items_summary
+FROM orders o
+LEFT JOIN order_items oi ON o.id = oi.order_id
+GROUP BY o.id;
+
 -- Seed Data: Sample Canteen Menu Items (Food & Beverages)
 INSERT INTO items (name, category, price, is_available) VALUES
 ('Veg Burger', 'Food', 50.00, 1),

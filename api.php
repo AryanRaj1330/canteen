@@ -175,6 +175,26 @@ switch ($action) {
         }
         break;
 
+    // BULK UPDATE MULTIPLE SELECTED ORDERS
+    case 'bulk_update_status':
+        if (empty($_SESSION['staff_logged_in'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $ids = $_POST['order_ids'] ?? [];
+        $newStatus = $_POST['status'] ?? '';
+        $allowed = ['Received', 'Preparing', 'Ready'];
+
+        if (!empty($ids) && in_array($newStatus, $allowed, true)) {
+            $inClause = implode(',', array_map('intval', $ids));
+            $pdo->exec("UPDATE orders SET status = '{$newStatus}' WHERE id IN ($inClause)");
+            echo json_encode(['success' => true, 'message' => count($ids) . " orders updated to {$newStatus}!"]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid order selection or status']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

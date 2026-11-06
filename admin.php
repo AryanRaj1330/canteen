@@ -118,10 +118,22 @@ $orders = fetchAllOrdersWithItems($pdo);
             </div>
         </div>
 
+        <!-- Bulk Status Action Bar -->
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 14px; background: #fff; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 6px;">
+            <span style="font-weight: 600; font-size: 0.9rem;">Bulk Action:</span>
+            <select id="bulk-status-select" class="form-control" style="width: auto; padding: 4px 8px;">
+                <option value="Preparing">Set to Preparing</option>
+                <option value="Ready">Set to Ready</option>
+                <option value="Received">Set to Received</option>
+            </select>
+            <button id="apply-bulk-btn" class="btn btn-primary btn-sm">Apply to Selected</button>
+        </div>
+
         <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
+                        <th style="width: 30px;"><input type="checkbox" id="select-all-orders"></th>
                         <th>Order #</th>
                         <th>Customer</th>
                         <th>Phone</th>
@@ -139,6 +151,7 @@ $orders = fetchAllOrdersWithItems($pdo);
                     <?php else: ?>
                         <?php foreach ($orders as $order): ?>
                             <tr>
+                                <td><input type="checkbox" class="order-cb" value="<?= $order['id'] ?>"></td>
                                 <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
@@ -168,6 +181,31 @@ $orders = fetchAllOrdersWithItems($pdo);
 
     <script>
     $(document).ready(function() {
+
+        // Select all checkbox
+        $('#select-all-orders').on('change', function() {
+            $('.order-cb').prop('checked', $(this).is(':checked'));
+        });
+
+        // Apply bulk update
+        $('#apply-bulk-btn').on('click', function() {
+            var selectedIds = $('.order-cb:checked').map(function() { return $(this).val(); }).get();
+            var status = $('#bulk-status-select').val();
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one order.');
+                return;
+            }
+
+            $.post('api.php', { action: 'bulk_update_status', order_ids: selectedIds, status: status }, function(res) {
+                if (res.success) {
+                    alert(res.message);
+                    window.location.reload();
+                } else {
+                    alert(res.message);
+                }
+            }, 'json');
+        });
 
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {

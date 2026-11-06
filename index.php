@@ -27,6 +27,7 @@ foreach ($items as $item) {
         <ul class="nav-links">
             <li><a href="index.php" class="active">Menu & Order</a></li>
             <li><a href="orders.php">Queue Status</a></li>
+            <li><a href="track.php">Track Order</a></li>
             <li><a href="admin.php">Staff Dashboard</a></li>
         </ul>
     </nav>

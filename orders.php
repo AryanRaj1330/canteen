@@ -20,6 +20,7 @@ $orders = fetchAllOrdersWithItems($pdo);
         <ul class="nav-links">
             <li><a href="index.php">Menu & Order</a></li>
             <li><a href="orders.php" class="active">Queue Status</a></li>
+            <li><a href="track.php">Track Order</a></li>
             <li><a href="admin.php">Staff Dashboard</a></li>
         </ul>
     </nav>

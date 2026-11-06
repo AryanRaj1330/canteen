@@ -175,6 +175,26 @@ switch ($action) {
         }
         break;
 
+    // GET ORDER STATUS (For Tracking)
+    case 'get_order_status':
+        $orderNo = trim($_GET['order_no'] ?? $_POST['order_no'] ?? '');
+        if (empty($orderNo)) {
+            echo json_encode(['success' => false, 'message' => 'Please provide an order number']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM orders WHERE order_no = ?");
+        $stmt->execute([$orderNo]);
+        $order = $stmt->fetch();
+
+        if ($order) {
+            $order['order_time'] = !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : date('h:i A');
+            echo json_encode(['success' => true, 'order' => $order]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Order not found. Please check order number.']);
+        }
+        break;
+
     // 7. GET ALL ORDERS (For Live Queue Refresh)
     case 'get_orders':
         $orders = fetchAllOrdersWithItems($pdo);

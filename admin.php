@@ -169,6 +169,25 @@ $orders = fetchAllOrdersWithItems($pdo);
     <script>
     $(document).ready(function() {
 
+        // Auto-refresh admin table every 5 seconds without disturbing active dropdowns
+        setInterval(function() {
+            var activeOrderId = $('select.status-select:focus').data('id');
+
+            $.get('api.php', { action: 'get_orders' }, function(res) {
+                if (res.success && res.orders) {
+                    $.each(res.orders, function(idx, o) {
+                        // Skip dropdown if staff currently has it focused/editing
+                        if (o.id !== activeOrderId) {
+                            var $sel = $('select.status-select[data-id="' + o.id + '"]');
+                            if ($sel.length && $sel.val() !== o.status) {
+                                $sel.val(o.status);
+                            }
+                        }
+                    });
+                }
+            }, 'json');
+        }, 5000);
+
         // Handle Status Change dropdown
         $('.status-select').on('change', function() {
             var $dropdown = $(this);

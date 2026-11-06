@@ -40,6 +40,27 @@ foreach ($items as $item) {
             <div class="menu-section">
                 <h1 class="page-title">Available Menu</h1>
 
+                <?php 
+                $specials = array_filter($items, fn($it) => !empty($it['is_special']));
+                if (!empty($specials)): 
+                ?>
+                    <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                        <h2 style="font-size: 1.1rem; color: #b45309; margin-bottom: 12px;">🌟 TODAY'S CHEF SPECIAL</h2>
+                        <div class="menu-grid">
+                            <?php foreach ($specials as $item): ?>
+                                <div class="item-card" style="border: 2px solid #f59e0b; background: #fff;">
+                                    <div>
+                                        <span class="badge" style="background: #f59e0b; color: #fff; margin-bottom: 6px;">CHEF CHOICE</span>
+                                        <div class="item-name" style="font-size: 1.1rem; font-weight: bold;"><?= htmlspecialchars($item['name']) ?></div>
+                                        <div class="item-price">₹<?= number_format($item['price'], 2) ?></div>
+                                    </div>
+                                    <button class="btn btn-primary add-to-cart-btn" data-id="<?= $item['id'] ?>">+ Add to Cart</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <?php if (empty($categories)): ?>
                     <p>No menu items available right now. Please check back later.</p>
                 <?php else: ?>

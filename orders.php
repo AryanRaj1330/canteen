@@ -104,6 +104,13 @@ $orders = fetchAllOrdersWithItems($pdo);
                         $tbody.html('<tr class="no-orders-row"><td colspan="6" style="text-align: center; color: #888; padding: 24px;">No active orders yet.</td></tr>');
                     } else {
                         $.each(res.orders, function(index, o) {
+                            if (o.status === 'Ready') {
+                                if (!knownReadyOrders.has(o.order_no) && !isFirstRun) {
+                                    playBeep();
+                                    alert('🔔 ORDER READY! #' + o.order_no + ' for ' + o.customer_name + ' is ready for collection!');
+                                }
+                                knownReadyOrders.add(o.order_no);
+                            }
                             var badgeClass = getBadgeClass(o.status);
                             var row = `
                                 <tr>
@@ -119,12 +126,33 @@ $orders = fetchAllOrdersWithItems($pdo);
                         });
                     }
 
+                    isFirstRun = false;
                     // Update timestamp display
                     var now = new Date();
                     $('#last-updated').text(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 }
             }, 'json');
         }
+
+        // Web Audio API beep sound generator
+        function playBeep() {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime); // 880 Hz beep
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        var knownReadyOrders = new Set();
+        var isFirstRun = true;
 
         // Periodic live queue update every 3 seconds
         var timer = setInterval(refreshOrders, 3000);

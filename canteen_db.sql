@@ -41,4 +41,7 @@ INSERT INTO items (name, category, price, is_available) VALUES
 ('Hot Samosa (2 pcs)', 'Food', 25.00, 1),
 ('Masala Dosa', 'Food', 60.00, 1),
 ('Cold Coffee', 'Beverages', 40.00, 1),
-('Lemon Iced Tea', 'Beverages', 30.00, 1);
+('Lemon Iced Tea', 'Beverages', 30.00, 1),
+('Veg Puff', 'Snacks', 20.00, 1),
+('Crispy French Fries', 'Snacks', 45.00, 1),
+('Cheese Nachos', 'Snacks', 50.00, 1);

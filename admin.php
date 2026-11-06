@@ -138,8 +138,22 @@ $orders = fetchAllOrdersWithItems($pdo);
                         </tr>
                     <?php else: ?>
                         <?php foreach ($orders as $order): ?>
-                            <tr>
-                                <td><strong><?= htmlspecialchars($order['order_no']) ?></strong></td>
+                            <?php 
+                                $isDelayed = false;
+                                if ($order['status'] === 'Received' && !empty($order['created_at'])) {
+                                    $elapsed = time() - strtotime($order['created_at']);
+                                    if ($elapsed > 600) {
+                                        $isDelayed = true;
+                                    }
+                                }
+                            ?>
+                            <tr style="<?= $isDelayed ? 'background-color: #fee2e2 !important; border-left: 4px solid #ef4444;' : '' ?>">
+                                <td>
+                                    <strong><?= htmlspecialchars($order['order_no']) ?></strong>
+                                    <?php if (!empty($isDelayed)): ?>
+                                        <span class="badge" style="background:#ef4444;color:#fff;margin-left:4px;font-size:0.7rem;">⚠️ Delayed >10m</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                 <td><?= htmlspecialchars($order['phone']) ?></td>
                                 <td><?= htmlspecialchars($order['items_summary'] ?: 'No items') ?></td>

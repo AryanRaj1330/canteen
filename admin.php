@@ -118,6 +118,17 @@ $orders = fetchAllOrdersWithItems($pdo);
             </div>
         </div>
 
+        <!-- Database Index Optimization Note -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+            <h4 style="color: #1e40af; margin-bottom: 4px;">⚡ Database Optimization: Indexes Added</h4>
+            <p style="font-size: 0.85rem; color: #1e3a8a; line-height: 1.5;">
+                Added <code>INDEX idx_orders_status ON orders(status)</code> and <code>INDEX idx_orders_created_at ON orders(created_at)</code>.<br>
+                <strong>Benefits:</strong><br>
+                1. <em>Queue Refresh Queries:</em> <code>SELECT * FROM orders WHERE status != 'Ready'</code> uses index lookups rather than scanning all table rows.<br>
+                2. <em>Date/Hour Reporting:</em> <code>GROUP BY DATE(created_at)</code> and <code>ORDER BY created_at DESC</code> are served directly from the B-Tree index without sorting overhead.
+            </p>
+        </div>
+
         <div class="table-container">
             <table class="table">
                 <thead>

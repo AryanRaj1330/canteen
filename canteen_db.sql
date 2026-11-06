@@ -34,6 +34,12 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
+-- Indexes for performance optimization:
+-- idx_orders_status: Accelerates queue status polling (WHERE status != 'Ready' and status = 'Received')
+-- idx_orders_created_at: Accelerates daily/hourly grouping and date-range sorting
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_created_at ON orders(created_at);
+
 -- Seed Data: Sample Canteen Menu Items (Food & Beverages)
 INSERT INTO items (name, category, price, is_available) VALUES
 ('Veg Burger', 'Food', 50.00, 1),
